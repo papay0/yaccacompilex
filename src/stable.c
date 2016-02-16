@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "stable.h"
+#include "warning.h"
+
+#define DEBUG       1
 
 const int SYMBOL_INITIALIZED 		= 0x01;
 const int SYMBOL_CONST			= 0x02;
@@ -30,7 +33,7 @@ void symbol_free(symbol_t* this)
 {
 	free(this->name);
 	free(this);
-} 
+}
 
 // Crée la table de symboles
 stable_t* stable_new()
@@ -73,6 +76,10 @@ void stable_free(stable_t* this)
 
 void stable_add(stable_t* this, char* name, int address, int depth, int size)
 {
+	if (stable_find(this, name) != NULL)
+	{
+		print_warn("Variable existe deja", DEBUG);
+	}
 	symbol_t* symbol = symbol_new(name, address, depth, size);
 	if(this->first == NULL)
 	{
@@ -90,17 +97,17 @@ void stable_add(stable_t* this, char* name, int address, int depth, int size)
 }
 
 // Retourne l'address du symbole dont le nom est donné par name.
-// Retourne -1 s'il n'existe pas.
+// Retourne NULL s'il n'existe pas.
 symbol_t* stable_find(stable_t* this, char* name)
 {
 	symbol_t* current = this->first;
 	while(current != NULL)
 	{
 		if(strcmp(name, current->name) == 0)
-			return current;	
-		current = current->next;	
+			return current;
+		current = current->next;
 	}
-	return NULL;	
+	return NULL;
 }
 
 int stable_setflags(stable_t* this, char* name, int flags)
@@ -117,11 +124,9 @@ int stable_print(stable_t* this)
 	while(current != NULL)
 	{
 
-		printf("%5s|%8d|%6d|%5d\n", current->name, current->address, 
+		printf("%5s|%8d|%6d|%5d\n", current->name, current->address,
 				current->flags, current->depth);
 		current = current->next;
 	}
-	return -1;	
+	return -1;
 }
-
-
