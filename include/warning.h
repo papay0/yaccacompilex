@@ -2,6 +2,6 @@
 #define WARNING_H
 
 // Affiche un message de warning
-void print_warn(char* message, int print);
+void print_warning(const char*,...);
 
 #endif

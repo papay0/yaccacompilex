@@ -4,7 +4,6 @@
 #include "stable.h"
 #include "warning.h"
 
-#define DEBUG       1
 
 const int SYMBOL_INITIALIZED 		= 0x01;
 const int SYMBOL_CONST			= 0x02;
@@ -78,7 +77,7 @@ void stable_add(stable_t* this, char* name, int address, int depth, int size)
 {
 	if (stable_find(this, name) != NULL)
 	{
-		print_warn("Variable existe deja", DEBUG);
+		print_warning("Variable %s existe deja\n", name);
 	}
 	symbol_t* symbol = symbol_new(name, address, depth, size);
 	if(this->first == NULL)
