@@ -3,6 +3,7 @@
 
 #include "stable.h"
 #include "idbuffer.h"
+#include "types.h"
 
 void ctx_init();
 

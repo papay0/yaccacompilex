@@ -6,8 +6,8 @@ LDFLAGS=-g -ll
 
 all: bin/parser
 
-bin/parser: build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o
-	$(LD) build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o $(LDFLAGS) -o bin/parser
+bin/parser: build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o
+	$(LD) build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o $(LDFLAGS) -o bin/parser
 
 build/lex.yy.c: src/source.lex
 	flex src/source.lex
@@ -34,5 +34,8 @@ build/stable.o: src/stable.c
 build/idbuffer.o: src/idbuffer.c
 	$(CC) src/idbuffer.c $(CCFLAGS) $(INCLUDE) -c -o build/idbuffer.o
 	
+build/types.o: src/types.c
+	$(CC) src/types.c $(CCFLAGS) $(INCLUDE) -c -o build/types.o
+
 clean:
 	rm build/*

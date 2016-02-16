@@ -1,5 +1,7 @@
+Arthur : 
 - Dans add, checker que le n'symbole existe pas déjà
+- Gestion des moins devant un nombre, déréférencement (opérateurs * et &) 
+
+Jojo : 
 - Table des fonctions
 - Gestion des types
-- Gestion des moins devant un nombre
-- Déréférencement  
