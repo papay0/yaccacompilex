@@ -46,10 +46,10 @@ typedef struct ptrtype {
 
 
 
-type_t type_create_ptr(type_t* type);
+type_t* type_create_ptr(type_t* type);
 
-type_t type_create_primitive(char* name);
+type_t* type_create_primitive(char* name);
 
-type_t type_create_func(type_t* return_type, type_t** arg_types, int argc);
+type_t* type_create_func(type_t* return_type, type_t** arg_types, int argc);
 
 int type_equals(type_t* t1, type_t* t2);
