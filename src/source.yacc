@@ -9,6 +9,8 @@
 %type  <number> Expr
 %type  <number> Affect
 %type  <number> FuncCallExpr
+%type  <type> Type
+%type  <type> VarDeclType
 %error-verbose
 
 %right tAffect
@@ -20,7 +22,8 @@
 %start Input 
 
 %union 
-{
+{	
+	int type;
         int number;
         char *string;
 }
@@ -38,7 +41,6 @@ Input 		: 	FuncDecl Input
 
 FuncDecl 	:	Type tID tPO TypedParams tPC Body;
 
-Type 		:   	tINT;	
 
 Body 		: 	tAO InstList tAC
 			| tAO tAC;
@@ -59,8 +61,29 @@ IFuncCall	: 	FuncCallExpr tSemi;
 
 IVarDeclAff	: 	Type IDList tAffect Expr tSemi;
 
-IVarDecl	: 	Type tID tSemi {
-	stable_add(symbols, $2, 0, ctx.depth, sizeof(int));
+IVarDecl	: 	VarDeclType IDList tSemi { 
+	for(int i = 0; i < idbuffer_size(); i++)
+	{
+		// TODO : 0xDODO => size ou type
+		printf("stable_add %s %p\n", idbuffer_get(i), idbuffer_get(i));
+		stable_add(symbols, idbuffer_get(i), -1, ctx.depth, 0xD0D0);
+	}
+};
+
+IDList 		: 	VarDeclID SIDList 
+			| VarDeclID;
+
+SIDList  	: 	tComa VarDeclID SIDList
+			| tComa VarDeclID 
+			;
+
+VarDeclID	:	tID {
+	idbuffer_add($1);
+};
+
+VarDeclType	:	tINT {
+	idbuffer_init();
+	idbuffer_settype(0);
 };
 
 IVarAff 	: 	Affect tSemi;
@@ -83,7 +106,7 @@ Expr 		:	Affect
 			| Expr tDiv Expr 
 			| FuncCallExpr
 			| tNumber 
-			| tID 
+			| tID { $$ = 0; } 
 			;
 FuncCallExpr	: 	tID tPO Params tPC { $$ = 0; };
 TypedParams 	:	TypedParam STypedParams
@@ -99,11 +122,7 @@ Params 		: 	Expr SParams
 SParams 	: 	tComa Expr SParams
 			| tComa Expr;
 
-IDList 		: 	tID SParams
-			| ;
-
-IDList  	: 	tComa tID SParams
-			| tComa tID;
+Type 		:   	tINT { $$ = 0; };	
 %%
 
 void yyerror(char const * errorText) { }

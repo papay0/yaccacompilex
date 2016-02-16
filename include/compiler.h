@@ -2,6 +2,7 @@
 #define COMPILER_H
 
 #include "stable.h"
+#include "idbuffer.h"
 
 void ctx_init();
 
