@@ -5,7 +5,7 @@ int getMode();
 #define p(x, s) if(getMode() == 0) printf(x, s)
 
 %}
-tNumber 	([0-9]+)(e(\+|\-)[0-9]+)*
+tNumber 	 (\+|\-)?([0-9]+)(e(\+|\-)[0-9]+)*
 tID 		([a-zA-Z_]+[0-9a-zA-Z_]*)
 tINT 		"int"
 tPrint 		"print"
@@ -29,10 +29,10 @@ tOr		"||"
 tNot		"!"
 tNotEquals 	"!="
 %%
- 
+
 {tNumber} {
 	yylval.number = atoi(yytext);
-	p("Number{%s} ", yytext); 
+	p("Number{%s} ", yytext);
 	return tNumber;
 };
 {tINT} 			{ p("INT{%s} ", yytext); 	return tINT; };
@@ -60,4 +60,3 @@ tNotEquals 	"!="
 
 . ;
 %%
-
