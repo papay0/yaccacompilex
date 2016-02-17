@@ -12,6 +12,9 @@
 %type  <type> Type
 %type  <type> PrimType
 %type  <type> VarDeclType
+%type  <type> PtrType
+%type  <type> FuncType
+
 %error-verbose
 
 %right tAffect
@@ -70,8 +73,8 @@ VarDecl		: 	VarDeclType IDList {
 	for(int i = 0; i < idbuffer_size(); i++)
 	{
 		// TODO : 0xDODO => size ou type
-		printf("stable_add %s %p\n", idbuffer_get(i), idbuffer_get(i));
-		stable_add(symbols, idbuffer_get(i), -1, ctx.depth, $1);
+		printf("stable_add %s %p\n", (char*)idbuffer_get(i), idbuffer_get(i));
+		stable_add(symbols, (char*)idbuffer_get(i), -1, ctx.depth, $1);
 	}
 };
 
@@ -83,12 +86,11 @@ SIDList  	: 	tComa VarDeclID SIDList
 			;
 
 VarDeclID	:	tID {
-	idbuffer_add($1);
+	idbuffer_addstr($1);
 };
 
 VarDeclType	:	Type {
 	idbuffer_init();
-	idbuffer_settype(0);
 	$$ = $1;
 };
 
@@ -139,9 +141,28 @@ Params 		: 	Expr SParams
 SParams 	: 	tComa Expr SParams
 			| tComa Expr;
 
-Type 		:   	PrimType {
-  $$ = $1; 
-}			| Type tMult {
+Type 		:   	PrimType
+			| PtrType
+			| FuncType; 
+
+FuncType	:	Type tPO tMult tPC tPO TypeList tPC {
+  type_t** args = (type_t**)malloc(sizeof(type_t*)*idbuffer_size());
+  for(int i = 0; i < idbuffer_size(); i++)
+  {
+    args[i] = idbuffer_get(i);
+  }
+  type_t* func = type_create_func($1, args, idbuffer_size()); 
+  $$ = func;
+};
+
+TypeList	:	STypeList {  }
+			| { };
+
+STypeList	: 	Type tComa STypeList { idbuffer_add($1); }
+			| Type { idbuffer_init(); idbuffer_add($1); };
+			
+
+PtrType 	:	Type tMult {
   $$ = type_create_ptr($1);
 };
 

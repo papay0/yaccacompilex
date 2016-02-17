@@ -61,6 +61,7 @@ type_t* type_create_func(type_t* return_type, type_t** arg_types, int argc)
 	{
 		func->arg_types[i] = arg_types[i];
 	}
+	func->argc = argc;
 	return ((type_t*)func);
 }
 
@@ -77,7 +78,16 @@ void type_print(type_t* type)
 	}
 	else if(type->kind == TYPE_KIND_FUNCTION)
 	{
-		printf("func<todo>");
+		functype_t* func = (functype_t*)type;
+		type_print(func->return_type);
+		printf("(*) (");
+		for(int i = 0; i < func->argc; i++)
+		{
+			type_print(func->arg_types[i]);
+			if(i != func->argc -1)
+				printf(",");
+		}
+		printf(")"); 
 	}
 	else
 		assert(0);

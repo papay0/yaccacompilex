@@ -8,7 +8,7 @@
 // Ex : int a, b, c, d, e; => idbuffer = ["a", "b", "c", "d", "e"]
 
 int buffsize;
-char* idbuffer[MAX_BUFF];
+void* idbuffer[MAX_BUFF];
 int bufftype;
 
 void idbuffer_settype(int type)
@@ -28,7 +28,7 @@ void idbuffer_init()
 }
 
 // Ajoute un identifier au buffer
-void idbuffer_add(char* const identifier)
+void idbuffer_addstr(char* const identifier)
 {
 	assert(buffsize < MAX_BUFF);
 	char* nbuff = (char*)malloc(strlen(identifier)+1);
@@ -36,7 +36,13 @@ void idbuffer_add(char* const identifier)
 	idbuffer[buffsize++] = nbuff;		
 }
 
-char* const idbuffer_get(int i)
+void idbuffer_add(void* ptr)
+{
+	assert(buffsize < MAX_BUFF);
+	idbuffer[buffsize++] = ptr;	
+}
+
+void* idbuffer_get(int i)
 {
 	assert(i < buffsize);
 	return idbuffer[i];

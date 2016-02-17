@@ -34,6 +34,7 @@ typedef struct functype {
 	int kind;
 	type_t* return_type;
 	type_t* arg_types[MAX_FUNC_ARGS];
+	int argc;
 } functype_t;
 
 // Type pointeur

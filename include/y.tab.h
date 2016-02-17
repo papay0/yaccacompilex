@@ -100,7 +100,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 32 "src/source.yacc" /* yacc.c:1909  */
+#line 35 "src/source.yacc" /* yacc.c:1909  */
 	
         int number;
         char *string;
