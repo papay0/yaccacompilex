@@ -5,6 +5,12 @@
 #include "idbuffer.h"
 #include "types.h"
 
+typedef struct expression
+{
+	int address;
+	type_t* type;
+} expression_t;
+
 void ctx_init();
 
 // Variables globales

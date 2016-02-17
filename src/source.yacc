@@ -6,10 +6,11 @@
 %token <number> tNumber 
 %token <string> tID
 
-%type  <number> Expr
-%type  <number> Affect
-%type  <number> FuncCallExpr
+%type  <expression> Expr
+%type  <expression> Affect
+%type  <expression> FuncCallExpr
 %type  <type> Type
+%type  <type> PrimType
 %type  <type> VarDeclType
 %error-verbose
 
@@ -21,18 +22,20 @@
  
 %start Input 
 
-%union 
-{	
-	int type;
-        int number;
-        char *string;
-}
-
 %{
 	#include <stdio.h>
 	#include "compiler.h"
 	void yyerror(char const * errorText);
 %}
+
+%union 
+{	
+        int number;
+        char *string;
+	type_t* type;
+	expression_t expression;
+}
+
 
 %%
 
@@ -59,14 +62,16 @@ Inst		:  	IVarDecl
 
 IFuncCall	: 	FuncCallExpr tSemi;
 
-IVarDeclAff	: 	Type IDList tAffect Expr tSemi;
+IVarDeclAff	: 	VarDecl tAffect Expr tSemi;
 
-IVarDecl	: 	VarDeclType IDList tSemi { 
+IVarDecl	:	VarDecl tSemi;
+
+VarDecl		: 	VarDeclType IDList { 
 	for(int i = 0; i < idbuffer_size(); i++)
 	{
 		// TODO : 0xDODO => size ou type
 		printf("stable_add %s %p\n", idbuffer_get(i), idbuffer_get(i));
-		stable_add(symbols, idbuffer_get(i), -1, ctx.depth, 0xD0D0);
+		stable_add(symbols, idbuffer_get(i), -1, ctx.depth, $1);
 	}
 };
 
@@ -81,9 +86,10 @@ VarDeclID	:	tID {
 	idbuffer_add($1);
 };
 
-VarDeclType	:	tINT {
+VarDeclType	:	Type {
 	idbuffer_init();
 	idbuffer_settype(0);
+	$$ = $1;
 };
 
 IVarAff 	: 	Affect tSemi;
@@ -94,7 +100,10 @@ If		: 	tIf tPO Cond tPC Body;
 While		: 	tWhile tPO Cond tPC Body;
 Return		: 	tReturn Expr tSemi;
 Print		: 	tPrint tPO Expr tPC tSemi;
-Affect		: 	tID tAffect Expr { $$ = $3; };
+Affect		: 	tID tAffect Expr {
+
+};
+
 Expr 		:	Affect 
 			| Expr tEquals Expr
 			| Expr tNotEquals Expr
@@ -106,11 +115,19 @@ Expr 		:	Affect
 			| Expr tDiv Expr 
 			| FuncCallExpr
 			| tNumber 
-			| tID { $$ = 0; } 
+			| tID {  
+  symbol_t* sym = stable_find(symbols, $1);
+  $$.type = sym->type;
+  $$.address = sym->address;
+} 
 			;
-FuncCallExpr	: 	tID tPO Params tPC { $$ = 0; };
+FuncCallExpr	: 	tID tPO Params tPC {
+
+};
+
 TypedParams 	:	TypedParam STypedParams
 			| ;
+
 STypedParams	:	tComa TypedParam STypedParams 
 			| tComa TypedParam;
 
@@ -122,7 +139,16 @@ Params 		: 	Expr SParams
 SParams 	: 	tComa Expr SParams
 			| tComa Expr;
 
-Type 		:   	tINT { $$ = 0; };	
+Type 		:   	PrimType {
+  $$ = $1; 
+}			| Type tMult {
+  $$ = type_create_ptr($1);
+};
+
+PrimType	:	tINT { 
+  $$ = type_create_primitive("int");
+}
+
 %%
 
 void yyerror(char const * errorText) { }

@@ -7,14 +7,28 @@
 
 const int PTR_SIZE = 64;
 // Differents types de types
-const type_kind_t TYPE_KIND_PRIMITIVE = 0x01;
-const type_kind_t TYPE_KIND_POINTER 	= 0x02;
-const type_kind_t TYPE_KIND_FUNCTION 	= 0x03;
+
+const int TYPE_KIND_PRIMITIVE 	= 0x01;
+const int TYPE_KIND_POINTER 	= 0x02;
+const int TYPE_KIND_FUNCTION 	= 0x03;
 
 // Taille des types primitifs en octets.
 const int PRIM_SIZES[2] = { 1, 4 };
-const primitive_t PRIM_CHAR = 0x00;
-const primitive_t PRIM_INT = 0x01;
+const char* PRIM_NAMES[2] = {"char", "int"};
+const int PRIM_CHAR = 0x00;
+const int PRIM_INT = 0x01;
+
+int type_getsize(type_t* type)
+{
+	if(type->kind == TYPE_KIND_PRIMITIVE)
+		return PRIM_SIZES[((primtype_t*)type)->primitive];
+	else if(type->kind == TYPE_KIND_POINTER)
+		return PTR_SIZE;
+	else if(type->kind == TYPE_KIND_FUNCTION)
+		return PTR_SIZE;
+	else
+		assert(0);
+}
 
 type_t* type_create_ptr(type_t* type)
 {
@@ -26,7 +40,7 @@ type_t* type_create_ptr(type_t* type)
 
 type_t* type_create_primitive(char* name)
 {
-	primitive_t prim;
+	int prim;
 	primtype_t* type = (primtype_t*)malloc(sizeof(primtype_t));
 	type->kind = TYPE_KIND_PRIMITIVE;
 	if(strcmp(name, "char") == 0)
@@ -48,6 +62,25 @@ type_t* type_create_func(type_t* return_type, type_t** arg_types, int argc)
 		func->arg_types[i] = arg_types[i];
 	}
 	return ((type_t*)func);
+}
+
+void type_print(type_t* type)
+{
+	if(type->kind == TYPE_KIND_PRIMITIVE)
+	{
+		printf("%s", PRIM_NAMES[((primtype_t*)type)->primitive]);
+	}
+	else if(type->kind == TYPE_KIND_POINTER)
+	{	
+		type_print(((ptrtype_t*)type)->type);
+		printf("*");
+	}
+	else if(type->kind == TYPE_KIND_FUNCTION)
+	{
+		printf("func<todo>");
+	}
+	else
+		assert(0);
 }
 
 // TODO

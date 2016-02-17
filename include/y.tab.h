@@ -100,13 +100,14 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 25 "src/source.yacc" /* yacc.c:1909  */
+#line 32 "src/source.yacc" /* yacc.c:1909  */
 	
-	int type;
         int number;
         char *string;
+	type_t* type;
+	expression_t expression;
 
-#line 110 "y.tab.h" /* yacc.c:1909  */
+#line 111 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

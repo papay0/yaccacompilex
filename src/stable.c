@@ -12,7 +12,7 @@ const int SYMBOL_STATIC			= 0x08;
 const int SYMBOL_FUNC			= 0x10;
 
 
-symbol_t* symbol_new(char* chr, int address, int depth, int size)
+symbol_t* symbol_new(char* chr, int address, int depth, type_t* type)
 {
 	// On crée une copie du string.
 	char* cpy = malloc(1+strlen(chr));
@@ -24,7 +24,7 @@ symbol_t* symbol_new(char* chr, int address, int depth, int size)
 	s->next = NULL;
 	s->flags = 0;
 	s->depth = depth;
-	s->size = size;
+	s->type = type;
 	return s;
 }
 
@@ -73,13 +73,13 @@ void stable_free(stable_t* this)
 	free(this);
 }
 
-void stable_add(stable_t* this, char* name, int address, int depth, int size)
+void stable_add(stable_t* this, char* name, int address, int depth, type_t* type)
 {
 	if (stable_find(this, name) != NULL)
 	{
 		print_warning("Variable %s existe deja\n", name);
 	}
-	symbol_t* symbol = symbol_new(name, address, depth, size);
+	symbol_t* symbol = symbol_new(name, address, depth, type);
 	if(this->first == NULL)
 	{
 		this->first = symbol;
@@ -119,12 +119,14 @@ int stable_setflags(stable_t* this, char* name, int flags)
 int stable_print(stable_t* this)
 {
 	symbol_t* current = this->first;
-	printf("ID   |Address |FLAGS |DEPTH\n");
+	printf("ID      |Address |FLAGS   |DEPTH   |Type\n");
 	while(current != NULL)
 	{
 
-		printf("%5s|%8d|%6d|%5d\n", current->name, current->address,
+		printf("%8s|%8d|%8d|%8d|", current->name, current->address,
 				current->flags, current->depth);
+		type_print(current->type);
+		printf("\n");
 		current = current->next;
 	}
 	return -1;
