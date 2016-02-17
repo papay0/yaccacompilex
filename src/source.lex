@@ -1,4 +1,6 @@
 %{
+
+#include "compiler.h"
 #include "y.tab.h"
 #include <stdio.h>
 int getMode();
@@ -8,6 +10,7 @@ int getMode();
 tNumber 	 (\+|\-)?([0-9]+)(e(\+|\-)[0-9]+)*
 tID 		([a-zA-Z_]+[0-9a-zA-Z_]*)
 tINT 		"int"
+tCHAR		"char"
 tPrint 		"print"
 tIf 		"if"
 tWhile 		"while"
@@ -36,6 +39,7 @@ tNotEquals 	"!="
 	return tNumber;
 };
 {tINT} 			{ p("INT{%s} ", yytext); 	return tINT; };
+{tCHAR}			{ p("CHAR{%s} ", yytext); 	return tCHAR; };
 {tPrint} 		{ p("Print{%s} ", yytext); 	return tPrint; };
 {tIf} 			{ p("If{%s} ", yytext); 	return tIf; };
 {tWhile} 		{ p("While{%s} ", yytext); 	return tWhile; };

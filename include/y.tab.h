@@ -46,68 +46,70 @@ extern int yydebug;
   enum yytokentype
   {
     tINT = 258,
-    tAnd = 259,
-    tOr = 260,
-    tEquals = 261,
-    tNotEquals = 262,
-    tNot = 263,
-    tPrint = 264,
-    tIf = 265,
-    tWhile = 266,
-    tReturn = 267,
-    tSemi = 268,
-    tComa = 269,
-    tAffect = 270,
-    tPlus = 271,
-    tMinus = 272,
-    tMult = 273,
-    tDiv = 274,
-    tPO = 275,
-    tPC = 276,
-    tAO = 277,
-    tAC = 278,
-    tNumber = 279,
-    tID = 280
+    tCHAR = 259,
+    tAnd = 260,
+    tOr = 261,
+    tEquals = 262,
+    tNotEquals = 263,
+    tNot = 264,
+    tPrint = 265,
+    tIf = 266,
+    tWhile = 267,
+    tReturn = 268,
+    tSemi = 269,
+    tComa = 270,
+    tAffect = 271,
+    tPlus = 272,
+    tMinus = 273,
+    tMult = 274,
+    tDiv = 275,
+    tPO = 276,
+    tPC = 277,
+    tAO = 278,
+    tAC = 279,
+    tNumber = 280,
+    tID = 281
   };
 #endif
 /* Tokens.  */
 #define tINT 258
-#define tAnd 259
-#define tOr 260
-#define tEquals 261
-#define tNotEquals 262
-#define tNot 263
-#define tPrint 264
-#define tIf 265
-#define tWhile 266
-#define tReturn 267
-#define tSemi 268
-#define tComa 269
-#define tAffect 270
-#define tPlus 271
-#define tMinus 272
-#define tMult 273
-#define tDiv 274
-#define tPO 275
-#define tPC 276
-#define tAO 277
-#define tAC 278
-#define tNumber 279
-#define tID 280
+#define tCHAR 259
+#define tAnd 260
+#define tOr 261
+#define tEquals 262
+#define tNotEquals 263
+#define tNot 264
+#define tPrint 265
+#define tIf 266
+#define tWhile 267
+#define tReturn 268
+#define tSemi 269
+#define tComa 270
+#define tAffect 271
+#define tPlus 272
+#define tMinus 273
+#define tMult 274
+#define tDiv 275
+#define tPO 276
+#define tPC 277
+#define tAO 278
+#define tAC 279
+#define tNumber 280
+#define tID 281
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 35 "src/source.yacc" /* yacc.c:1909  */
+#line 34 "src/source.yacc" /* yacc.c:1909  */
 	
         int number;
         char *string;
 	type_t* type;
 	expression_t expression;
 
-#line 111 "y.tab.h" /* yacc.c:1909  */
+#line 113 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

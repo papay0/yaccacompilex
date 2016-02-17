@@ -1,11 +1,10 @@
-%token tINT 
+%token tINT tCHAR
 %token tAnd tOr tEquals tNotEquals tNot
 %token tPrint tIf tWhile tReturn 
 %token tSemi tComa tAffect tPlus tMinus tMult tDiv
 %token tPO tPC tAO tAC
 %token <number> tNumber 
 %token <string> tID
-
 %type  <expression> Expr
 %type  <expression> Affect
 %type  <expression> FuncCallExpr
@@ -166,9 +165,8 @@ PtrType 	:	Type tMult {
   $$ = type_create_ptr($1);
 };
 
-PrimType	:	tINT { 
-  $$ = type_create_primitive("int");
-}
+PrimType	:	tINT { $$ = type_create_primitive("int"); }
+			| tCHAR { $$ = type_create_primitive("char"); }
 
 %%
 
