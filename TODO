@@ -1,6 +1,5 @@
 Arthur : 
-- Dans add, checker que le n'symbole existe pas déjà
-- Gestion des moins devant un nombre, déréférencement (opérateurs * et &) 
+- Déréférencement (opérateurs * et &) 
 
 Jojo : 
 - Table des fonctions
