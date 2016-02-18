@@ -148,7 +148,7 @@ FuncType	:	Type tPO tMult tPC tPO TypeList tPC {
   type_t** args = (type_t**)malloc(sizeof(type_t*)*idbuffer_size());
   for(int i = 0; i < idbuffer_size(); i++)
   {
-    args[i] = idbuffer_get(i);
+    args[idbuffer_size() - i - 1] = idbuffer_get(i);
   }
   type_t* func = type_create_func($1, args, idbuffer_size()); 
   $$ = func;
