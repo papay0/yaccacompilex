@@ -84,6 +84,7 @@ void stable_add(stable_t* this, char* name, int address, int depth, type_t* type
 	if(this->first == NULL)
 	{
 		this->first = symbol;
+		symbol->address = 0;
 	}
 	else
 	{
@@ -93,6 +94,7 @@ void stable_add(stable_t* this, char* name, int address, int depth, type_t* type
 			current = current->next;
 		}
 		current->next = symbol;
+		symbol->address = current->address+1;
 	}
 }
 
