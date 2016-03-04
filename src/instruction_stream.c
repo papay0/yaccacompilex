@@ -1,9 +1,9 @@
 #include "instruction_stream.h"
 
-FILE * fp;
+static FILE * fp;
 
 void istream_open() {
-    fp = fopen ("yaccacompilex", "w+");
+    fp = fopen ("bin/yaccacompilex", "w+");
 }
 
 void istream_printf(char* format, ... ) {

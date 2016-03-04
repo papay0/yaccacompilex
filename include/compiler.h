@@ -12,6 +12,7 @@ typedef struct expression
 } expression_t;
 
 void ctx_init();
+void ctx_close();
 
 // Variables globales
 context_t ctx;

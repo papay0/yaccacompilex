@@ -77,6 +77,7 @@ void stable_add(stable_t* this, char* name, int address, int depth, type_t* type
 {
 	if (stable_find(this, name) != NULL)
 	{
+		print_warning("Variable %s existe deja\n", name);
 		istream_printf("Variable %s existe deja\n", name);
 	}
 	symbol_t* symbol = symbol_new(name, address, depth, type);
