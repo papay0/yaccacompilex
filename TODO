@@ -1,6 +1,7 @@
 Arthur :
-- Déréférencement (opérateurs * et &)
+-
 
 Jojo :
 - Table des fonctions
 - Rajouter le close du file
+- Gérer le scope

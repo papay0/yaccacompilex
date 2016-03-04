@@ -18,7 +18,7 @@ typedef struct context {
 typedef struct symbol {
 	symbol_t* next;
 	char*  name;
-	int address;	
+	int address;
 	int flags;
 	int depth;
 	type_t* type;
@@ -29,7 +29,7 @@ typedef struct symbol_table {
 	symbol_t* first;
 } stable_t;
 
-// Crée un nouveau symbole avec le nom et l'addresse donnee. 
+// Crée un nouveau symbole avec le nom et l'addresse donnee.
 symbol_t* symbol_new(char* name, int address, int depth, type_t* type);
 // Libère la mémoire allouée par le symbole donné.
 void symbol_free(symbol_t* this);

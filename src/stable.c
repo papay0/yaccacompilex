@@ -105,7 +105,7 @@ symbol_t* stable_find(stable_t* this, char* name)
 	symbol_t* current = this->first;
 	while(current != NULL)
 	{
-		if(strcmp(name, current->name) == 0)
+		if (strcmp(name, current->name) == 0)
 			return current;
 		current = current->next;
 	}
