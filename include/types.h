@@ -19,8 +19,8 @@ const int PRIM_INT;
 
 // Type (générique)
 typedef struct type {
-	int kind; // 
-	void* padding[MAX_FUNC_ARGS+1];
+	int kind; //
+	char data[];
 } type_t;
 
 // Type primitif
