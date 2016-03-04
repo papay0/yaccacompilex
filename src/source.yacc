@@ -64,7 +64,13 @@ Inst		:  	IVarDecl
 
 IFuncCall	: 	FuncCallExpr tSemi;
 
-IVarDeclAff	: 	VarDecl tAffect Expr tSemi;
+IVarDeclAff	: 	VarDecl tAffect Expr tSemi {
+	for(int i = 0; i < idbuffer_size(); i++)
+	{
+		const char* symbol = (const char*)idbuffer_get(i);
+		do_affect(symbol, $3, 1);
+	}
+};
 
 IVarDecl	:	VarDecl tSemi;
 
@@ -102,20 +108,27 @@ While		: 	tWhile tPO Cond tPC Body;
 Return		: 	tReturn Expr tSemi;
 Print		: 	tPrint tPO Expr tPC tSemi;
 Affect		: 	tID tAffect Expr {
-
+	do_affect($1, $3, 0);
+	$$.address = $3.address;
 };
 
-Expr 		:	Affect 
-			| Expr tEquals Expr
-			| Expr tNotEquals Expr
-			| Expr tAnd Expr 
-			| Expr tOr Expr 
-			| Expr tPlus Expr 
-			| Expr tMinus Expr 
-			| Expr tMult Expr 
-			| Expr tDiv Expr 
+Expr 		:	Affect {  } 
+			| tPO Expr tPC 		{ $$ = $2;}
+			| Expr tEquals Expr 	{ do_operation($1, $3, &$$, "EQ"); }
+			| Expr tNotEquals Expr 	{ do_operation($1, $3, &$$, "NEQ"); }
+			| Expr tAnd Expr 	{ do_operation($1, $3, &$$, "AND"); }
+			| Expr tOr Expr 	{ do_operation($1, $3, &$$, "OR"); }
+			| Expr tPlus Expr  	{ do_operation($1, $3, &$$, "ADD"); }
+			| Expr tMinus Expr 	{ do_operation($1, $3, &$$, "SUB"); }
+			| Expr tMult Expr 	{ do_operation($1, $3, &$$, "MUL"); }
+			| Expr tDiv Expr 	{ do_operation($1, $3, &$$, "DIV"); }
 			| FuncCallExpr
-			| tNumber 
+			| tNumber {
+  int addr = tempaddr_lock();
+  printf("AFC %d %d\n", addr, $1);
+  $$.address = addr;
+  $$.type = type_create_primitive("int");
+}
 			| tID {  
   symbol_t* sym = stable_find(symbols, $1);
   $$.type = sym->type;
@@ -165,7 +178,7 @@ PtrType 	:	Type tMult {
   $$ = type_create_ptr($1);
 };
 
-PrimType	:	tINT { $$ = type_create_primitive("int"); }
+PrimType	:	tINT 	{ $$ = type_create_primitive("int"); }
 			| tCHAR { $$ = type_create_primitive("char"); }
 
 %%
