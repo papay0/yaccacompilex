@@ -12,3 +12,7 @@ int idbuffer_size();
 // Selectionne le type des donnees contenues dans le type
 void idbuffer_settype(int type);
 
+
+int tempaddr_init();
+int tempaddr_lock();
+void tempaddr_unlock(int addr);

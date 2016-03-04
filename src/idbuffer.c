@@ -53,4 +53,48 @@ int idbuffer_size()
 	return buffsize;
 }
 
+// Addresses temporaires
+#define TEMPADDR_COUNT 2
+#define TEMPADDR_BASE 255
+typedef struct tempaddr {
+	int address;
+	int locked;
+} tempaddr_t;
+
+tempaddr_t tempaddr[TEMPADDR_COUNT];
+
+int tempaddr_init()
+{
+	for(int i = 0; i < TEMPADDR_COUNT; i++)
+	{
+		tempaddr[i].locked = 0;
+		tempaddr[i].address = TEMPADDR_BASE - i;				
+	}
+}
+int tempaddr_lock()
+{
+	for(int i = 0; i < TEMPADDR_COUNT; i++)
+	{
+		if(!tempaddr[i].locked) {
+			tempaddr[i].locked = 1;
+			return tempaddr[i].address;
+		}
+	}
+	printf("lock_tempaddr: not enough addresses\n");
+	return -1;
+}
+void tempaddr_unlock(int addr)
+{
+	for(int i = 0; i < TEMPADDR_COUNT; i++)
+	{
+		if(tempaddr[i].address == addr) {
+			tempaddr[i].locked = 0;
+			return;
+		}
+	}
+	printf("unlock_tempaddr: no var to unlock");
+
+}
+
+
 

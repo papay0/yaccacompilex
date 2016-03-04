@@ -48,7 +48,7 @@ tNotEquals 	"!="
 {tSemi} 		{ p("Semi{%s} ", yytext); 	return tSemi; };
 {tComa} 		{ p("Coma{%s} ", yytext); 	return tComa; };
 {tEquals}		{ p("Equals{%s} ", yytext);	return tEquals; };
-{tNotEquals} 		{ p("Not Equals{%s} ", yytext);	return tNotEquals; };
+{tNotEquals} 	{ p("Not Equals{%s} ", yytext);	return tNotEquals; };
 {tAffect} 		{ p("Affect{%s} ", yytext); 	return tAffect; };
 {tNot}			{ p("Not{%s} ", yytext);	return tNot; };
 {tPlus} 		{ p("Plus{%s} ", yytext); 	return tPlus; };
