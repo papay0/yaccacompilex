@@ -58,8 +58,35 @@ void do_loadsymbol(const char* name, expression_t* r)
 	}
 	r->type = symbol->type;
 	r->address = symbol->address;
+}
 
-	printf("blbl\n");
+
+void do_variable_declarations(type_t* type)
+{
+	for(int i = 0; i < idbuffer_size(); i++)
+	{
+		stable_add(symbols, (char*)idbuffer_get(i), type);
+	}
+}
+
+void do_variable_affectations(expression_t* expr)
+{
+	for(int i = 0; i < idbuffer_size(); i++)
+	{
+		const char* symbol = (const char*)idbuffer_get(i);
+		do_affect(symbol, *expr, 1);
+	}
+}
+
+type_t* do_makefunctype(type_t* return_type) 
+{
+  	type_t** args = (type_t**)malloc(sizeof(type_t*)*idbuffer_size());
+  	for(int i = 0; i < idbuffer_size(); i++)
+	{
+    	args[idbuffer_size() - i - 1] = idbuffer_get(i);
+	}
+	type_t* func = type_create_func(return_type, args, idbuffer_size()); 
+	return func;
 }
 /*
 int main()

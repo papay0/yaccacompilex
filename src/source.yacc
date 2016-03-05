@@ -67,23 +67,10 @@ Inst		:  	IVarDecl
 
 IFuncCall	: 	FuncCallExpr tSemi;
 
-IVarDeclAff	: 	VarDecl tAffect Expr tSemi {
-	for(int i = 0; i < idbuffer_size(); i++)
-	{
-		const char* symbol = (const char*)idbuffer_get(i);
-		do_affect(symbol, $3, 1);
-	}
-};
-
+IVarDeclAff	: 	VarDecl tAffect Expr tSemi { do_variable_affectations(&$3); };
 IVarDecl	:	VarDecl tSemi;
 
-VarDecl		: 	VarDeclType IDList { 
-	for(int i = 0; i < idbuffer_size(); i++)
-	{
-		// print_debug("stable_add %s %p\n", (char*)idbuffer_get(i), idbuffer_get(i));
-		stable_add(symbols, (char*)idbuffer_get(i), $1);
-	}
-};
+VarDecl		: 	VarDeclType IDList { do_variable_declarations(&$1); } ;
 
 IDList 		: 	VarDeclID SIDList 
 			| VarDeclID;
@@ -92,14 +79,9 @@ SIDList  	: 	tComa VarDeclID SIDList
 			| tComa VarDeclID 
 			;
 
-VarDeclID	:	tID {
-	idbuffer_addstr($1);
-};
+VarDeclID	:	tID {	idbuffer_addstr($1); };
 
-VarDeclType	:	Type {
-	idbuffer_init();
-	$$ = $1;
-};
+VarDeclType	:	Type { idbuffer_init();	$$ = $1; };
 
 IVarAff 	: 	Affect tSemi;
 
@@ -109,10 +91,7 @@ If		: 	tIf tPO Cond tPC Body;
 While		: 	tWhile tPO Cond tPC Body;
 Return		: 	tReturn Expr tSemi;
 Print		: 	tPrint tPO Expr tPC tSemi;
-Affect		: 	tID tAffect Expr {
-	do_affect($1, $3, 0);
-	$$.address = $3.address;
-};
+Affect		: 	tID tAffect Expr { do_affect($1, $3, 0); $$.address = $3.address; };
 
 Expr 		:	Affect {  } 
 			| tPO Expr tPC 		{ $$ = $2;}
@@ -150,15 +129,7 @@ Type 		:   	PrimType
 			| PtrType
 			| FuncType; 
 
-FuncType	:	Type tPO tMult tPC tPO TypeList tPC {
-  type_t** args = (type_t**)malloc(sizeof(type_t*)*idbuffer_size());
-  for(int i = 0; i < idbuffer_size(); i++)
-  {
-    args[idbuffer_size() - i - 1] = idbuffer_get(i);
-  }
-  type_t* func = type_create_func($1, args, idbuffer_size()); 
-  $$ = func;
-};
+FuncType	:	Type tPO tMult tPC tPO TypeList tPC { $$ = do_makefunctype(&$1); };
 
 TypeList	:	STypeList {  }
 			| { };

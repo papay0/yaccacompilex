@@ -185,7 +185,10 @@ int tempaddr_lock(stable_t* symbols)
 	{
 		if(!tempaddr[i].locked) {
 			tempaddr[i].locked = 1;
-			tempaddr[i].address = symbols->last->address + i;
+			if(symbols->last == NULL)
+				tempaddr[i].address = i;
+			else
+				tempaddr[i].address = symbols->last->address + i;
 			return tempaddr[i].address;
 		}
 	}
