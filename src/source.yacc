@@ -47,8 +47,11 @@ Input 		: 	FuncDecl Input
 FuncDecl 	:	Type tID tPO TypedParams tPC Body;
 
 
-Body 		: 	tAO InstList tAC
-			| tAO tAC;
+Body 		: 	BodyStart InstList BodyEnd
+			| BodyStart BodyEnd;
+
+BodyStart	:	tAO { stable_block_enter(symbols); };
+BodyEnd		: 	tAC { stable_block_exit(symbols); };
 
 InstList	: 	Inst InstList
 			| Inst;
@@ -77,9 +80,8 @@ IVarDecl	:	VarDecl tSemi;
 VarDecl		: 	VarDeclType IDList { 
 	for(int i = 0; i < idbuffer_size(); i++)
 	{
-		// TODO : 0xDODO => size ou type
-		printf("stable_add %s %p\n", (char*)idbuffer_get(i), idbuffer_get(i));
-		stable_add(symbols, (char*)idbuffer_get(i), -1, ctx.depth, $1);
+		// print_debug("stable_add %s %p\n", (char*)idbuffer_get(i), idbuffer_get(i));
+		stable_add(symbols, (char*)idbuffer_get(i), $1);
 	}
 };
 
@@ -123,17 +125,8 @@ Expr 		:	Affect {  }
 			| Expr tMult Expr 	{ do_operation($1, $3, &$$, "MUL"); }
 			| Expr tDiv Expr 	{ do_operation($1, $3, &$$, "DIV"); }
 			| FuncCallExpr
-			| tNumber {
-  int addr = tempaddr_lock();
-  printf("AFC %d %d\n", addr, $1);
-  $$.address = addr;
-  $$.type = type_create_primitive("int");
-}
-			| tID {  
-  symbol_t* sym = stable_find(symbols, $1);
-  $$.type = sym->type;
-  $$.address = sym->address;
-} 
+			| tNumber { do_loadliteral($1, &$$); }
+			| tID { printf("%s\n", $1); do_loadsymbol($1, &$$); } 
 			;
 FuncCallExpr	: 	tID tPO Params tPC {
 
@@ -188,16 +181,18 @@ int getMode();
 
 int main(int argc, char** argv) 
 {
-	ctx_init();
+	// test_stable(); return 0;
 	if(getMode() == 0)
 		while(1) { yylex(); }
 
 	if(getMode() == 1)
 		while(1)
 		{ 
+			ctx_init();
 			yyparse();
 			stable_print(symbols);
 			printf("New parse...\n");
+			ctx_close();
 		}
 
 	return 0;

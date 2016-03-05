@@ -39,6 +39,8 @@ stable_t* stable_new()
 {
 	stable_t* s = (stable_t*)malloc(sizeof(stable_t));
 	s->first = NULL;
+	s->last = NULL;
+	s->current_depth = 0;
 	return s;
 }
 
@@ -55,8 +57,14 @@ void stable_remove(stable_t* this, int depth)
 				prev->next = next;
 			else
 				this->first = next;
-			symbol_free(current);
 
+			// Branchement de this->last
+			if(next == NULL)
+			{
+				this->last = prev;
+			}
+
+			symbol_free(current);
 			current = next;
 		}
 		else
@@ -73,14 +81,16 @@ void stable_free(stable_t* this)
 	free(this);
 }
 
-void stable_add(stable_t* this, char* name, int address, int depth, type_t* type)
+void stable_add(stable_t* this, char* name, type_t* type)
 {
-	if (stable_find(this, name) != NULL)
+	symbol_t* sameSymbol = stable_find(this, name);
+	int depth = this->current_depth;
+	if (sameSymbol != NULL && sameSymbol->depth == depth)
 	{
-		print_warning("Variable %s existe deja\n", name);
-		istream_printf("Variable %s existe deja\n", name);
+		print_warning("Variable %s existe deja dans la même portée.\n", name);
 	}
-	symbol_t* symbol = symbol_new(name, address, depth, type);
+
+	symbol_t* symbol = symbol_new(name, -1, depth, type);
 	if(this->first == NULL)
 	{
 		this->first = symbol;
@@ -96,20 +106,26 @@ void stable_add(stable_t* this, char* name, int address, int depth, type_t* type
 		current->next = symbol;
 		symbol->address = current->address+1;
 	}
+
+	this->last = symbol;
 }
 
-// Retourne l'address du symbole dont le nom est donné par name.
+// Retourne le symbole dont le nom est donné par name.
+// Cette fonction retourne l'addresse du dernier symbole trouvé
+// (profondeur la plus élevée).
 // Retourne NULL s'il n'existe pas.
 symbol_t* stable_find(stable_t* this, char* name)
 {
 	symbol_t* current = this->first;
+	symbol_t* result = NULL;
 	while(current != NULL)
 	{
 		if (strcmp(name, current->name) == 0)
-			return current;
+			result = current;
 		current = current->next;
 	}
-	return NULL;
+	// printf("[stable_find] warning: symbol %s not found\n", name);
+	return result;
 }
 
 int stable_setflags(stable_t* this, char* name, int flags)
@@ -133,4 +149,79 @@ int stable_print(stable_t* this)
 		current = current->next;
 	}
 	return -1;
+}
+
+int stable_block_enter(stable_t* this)
+{
+	print_debug("Entering block...\n");
+	this->current_depth++;	
+}
+
+int stable_block_exit(stable_t* this)
+{
+	print_debug("Exiting block... \n");
+	print_debug("Symbol table before exit : \n");
+	stable_print(this);
+	stable_remove(this, this->current_depth);
+	this->current_depth--;
+}
+/* ----------------------------------------------------------------------------
+ * TEMPADDR
+ * --------------------------------------------------------------------------*/
+#define TEMPADDR_BASE 255
+
+int tempaddr_init()
+{
+	for(int i = 0; i < TEMPADDR_COUNT; i++)
+	{
+		tempaddr[i].locked = 0;
+		tempaddr[i].id = i;				
+	}
+}
+
+int tempaddr_lock(stable_t* symbols)
+{
+	for(int i = 0; i < TEMPADDR_COUNT; i++)
+	{
+		if(!tempaddr[i].locked) {
+			tempaddr[i].locked = 1;
+			tempaddr[i].address = symbols->last->address + i;
+			return tempaddr[i].address;
+		}
+	}
+	print_debug("lock_tempaddr: not enough addresses\n");
+	return -1;
+}
+
+void tempaddr_unlock(stable_t* symbols, int addr)
+{
+	for(int i = 0; i < TEMPADDR_COUNT; i++)
+	{
+		if(tempaddr[i].address == addr) {
+			tempaddr[i].locked = 0;
+			return;
+		}
+	}
+	print_debug("unlock_tempaddr: no var to unlock");
+}
+
+int test_stable()
+{
+	type_t* type = type_create_primitive("int");
+	stable_t* s = stable_new();
+	stable_add(s, "a", type);
+	stable_add(s, "b", type);
+	stable_block_enter(s);
+	stable_add(s, "c", type);
+	stable_add(s, "d", type);
+	stable_block_exit(s);
+	stable_block_exit(s);
+	stable_add(s, "a", type);
+	stable_print(s);
+	if(s->last == NULL)
+		printf("LAST : null");
+	else
+		printf("LAST : %s\n", s->last->name);
+
+	return 0;
 }

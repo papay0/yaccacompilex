@@ -13,6 +13,4 @@ int idbuffer_size();
 void idbuffer_settype(int type);
 
 
-int tempaddr_init();
-int tempaddr_lock();
-void tempaddr_unlock(int addr);
+
