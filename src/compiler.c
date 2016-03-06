@@ -27,7 +27,9 @@ int do_operation(expression_t e1, expression_t e2,
   	int newaddr = tempaddr_lock(symbols);
   	printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
 	r->address = newaddr;
+
 	// TODO : type check
+	r->type = e1.type; // FIXME
 	return newaddr;
 }
 

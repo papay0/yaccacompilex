@@ -1,7 +1,7 @@
 CC=gcc
 LD=gcc
 INCLUDE=-Iinclude
-CCFLAGS=-g -std=c99
+CCFLAGS=-g -Werror=incompatible-pointer-types -std=c99
 LDFLAGS=-g -ll
 
 all: bin/parser
@@ -25,19 +25,19 @@ build/y.tab.o: build/y.tab.c
 build/lex.yy.o: build/lex.yy.c
 	$(CC) build/lex.yy.c $(CCFLAGS) $(INCLUDE) -c -o build/lex.yy.o
 
-build/compiler.o: src/compiler.c
+build/compiler.o: src/compiler.c include/compiler.h
 	$(CC) src/compiler.c $(CCFLAGS) $(INCLUDE) -c -o build/compiler.o
 
-build/stable.o: src/stable.c
+build/stable.o: src/stable.c include/stable.h
 	$(CC) src/stable.c $(CCFLAGS) $(INCLUDE) -c -o build/stable.o
 
-build/idbuffer.o: src/idbuffer.c
+build/idbuffer.o: src/idbuffer.c include/idbuffer.h
 	$(CC) src/idbuffer.c $(CCFLAGS) $(INCLUDE) -c -o build/idbuffer.o
 
-build/types.o: src/types.c
+build/types.o: src/types.c include/types.h
 	$(CC) src/types.c $(CCFLAGS) $(INCLUDE) -c -o build/types.o
 
-build/warning.o: src/warning.c
+build/warning.o: src/warning.c include/warning.h
 	$(CC) src/warning.c $(CCFLAGS) $(INCLUDE) -c -o build/warning.o
 
 build/instruction_stream.o: src/instruction_stream.c

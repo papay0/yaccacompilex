@@ -20,7 +20,7 @@ const int PRIM_INT;
 // Type (générique)
 typedef struct type {
 	int kind; //
-	char data[];
+	void* data[MAX_FUNC_ARGS];
 } type_t;
 
 // Type primitif

@@ -22,7 +22,9 @@ int do_operation(expression_t e1, expression_t e2, expression_t* r, const char* 
 void do_affect(const char* symbol, expression_t expr, int unlock);
 void do_loadliteral(int literalValue, expression_t* r);
 void do_loadsymbol(const char* name, expression_t* r);
-
+void do_variable_declarations(type_t* type);
+void do_variable_affectations(expression_t* expr);
+type_t* do_makefunctype(type_t* return_type);
 
 // Variables globales
 context_t ctx;

@@ -70,7 +70,7 @@ IFuncCall	: 	FuncCallExpr tSemi;
 IVarDeclAff	: 	VarDecl tAffect Expr tSemi { do_variable_affectations(&$3); };
 IVarDecl	:	VarDecl tSemi;
 
-VarDecl		: 	VarDeclType IDList { do_variable_declarations(&$1); } ;
+VarDecl		: 	VarDeclType IDList { do_variable_declarations($1); } ;
 
 IDList 		: 	VarDeclID SIDList 
 			| VarDeclID;
@@ -129,7 +129,7 @@ Type 		:   	PrimType
 			| PtrType
 			| FuncType; 
 
-FuncType	:	Type tPO tMult tPC tPO TypeList tPC { $$ = do_makefunctype(&$1); };
+FuncType	:	Type tPO tMult tPC tPO TypeList tPC { $$ = do_makefunctype($1); };
 
 TypeList	:	STypeList {  }
 			| { };

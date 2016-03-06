@@ -90,7 +90,9 @@ void type_print(type_t* type)
 		printf(")"); 
 	}
 	else
-		assert(0);
+	{
+		print_debug("type_print: unknown type kind %d", type->kind);
+	}
 }
 
 // TODO
