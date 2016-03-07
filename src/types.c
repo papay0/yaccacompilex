@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include "types.h"
-
+#include "warning.h"
 
 const int PTR_SIZE = 64;
 // Differents types de types

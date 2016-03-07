@@ -28,7 +28,7 @@ void idbuffer_init()
 }
 
 // Ajoute un identifier au buffer
-void idbuffer_addstr(char* const identifier)
+void idbuffer_addstr(char* identifier)
 {
 	assert(buffsize < MAX_BUFF);
 	char* nbuff = (char*)malloc(strlen(identifier)+1);

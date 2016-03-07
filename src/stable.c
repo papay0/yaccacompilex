@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "stable.h"
+#include "warning.h"
 #include "instruction_stream.h"
 
 

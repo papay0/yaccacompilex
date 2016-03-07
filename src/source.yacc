@@ -79,7 +79,7 @@ SIDList  	: 	tComa VarDeclID SIDList
 			| tComa VarDeclID 
 			;
 
-VarDeclID	:	tID {	idbuffer_addstr($1); };
+VarDeclID	:	tID { idbuffer_addstr($1); };
 
 VarDeclType	:	Type { idbuffer_init();	$$ = $1; };
 

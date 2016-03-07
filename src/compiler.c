@@ -3,6 +3,7 @@
 #include <string.h>
 #include "compiler.h"
 #include "instruction_stream.h"
+#include "warning.h"
 
 void ctx_init()
 {
@@ -18,7 +19,7 @@ void ctx_close()
 	
 }
 int do_operation(expression_t e1, expression_t e2, 
-	expression_t* r, const char* opname)
+	expression_t* r, char* opname)
 {
 	int addr1 = e1.address;
 	int addr2 = e2.address;
@@ -43,7 +44,7 @@ int do_operation(expression_t e1, expression_t e2,
 }
 
 int do_unary_operation(expression_t e1, 
-	expression_t* r, const char* opname)
+	expression_t* r, char* opname)
 {
 	int addr1 = e1.address;
   	tempaddr_unlock(symbols, addr1);
@@ -68,7 +69,7 @@ void check_type_affect(type_t* dest, type_t* exprtype)
 	}
 }
 
-void do_affect(const char* name, expression_t expr, int unlock)
+void do_affect(char* name, expression_t expr, int unlock)
 {
 	symbol_t* symbol = stable_find(symbols, name);
 	if(symbol == NULL) 	{
@@ -92,7 +93,7 @@ void do_loadliteral(int literalValue, expression_t* r)
   	r->type = type_create_primitive("int");
 }
 
-void do_loadsymbol(const char* name, expression_t* r)
+void do_loadsymbol( char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
 	if(symbol == NULL) {
@@ -117,7 +118,7 @@ void do_variable_affectations(expression_t* expr)
 {
 	for(int i = 0; i < idbuffer_size(); i++)
 	{
-		const char* symbol = (const char*)idbuffer_get(i);
+		char* symbol = (char*)idbuffer_get(i);
 		do_affect(symbol, *expr, 1);
 	}
 }
@@ -133,7 +134,7 @@ type_t* do_makefunctype(type_t* return_type)
 	return func;
 }
 
-void do_dereference(const char* name, expression_t* r)
+void do_dereference(char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
 	if(symbol == NULL) {
