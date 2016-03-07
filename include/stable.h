@@ -66,19 +66,20 @@ void stable_remove(stable_t* this, int depth);
 // (profondeur la plus élevée).
 // Retourne NULL s'il n'existe pas.
 symbol_t* stable_find(stable_t* this, char* name);
-int stable_setflags(stable_t* this, char* name, int flags);
-int stable_print(stable_t* this);
+void stable_setflags(stable_t* this, char* name, int flags);
+void stable_print(stable_t* this);
 // Signale à la table des symboles l'entrée dans un block.
 // Cela a pour effet d'augmenter la profondeur actuelle.
-int stable_block_enter();
+void stable_block_enter();
 // Signale à la table des symboles la sortie d'un block.
 // Cela a pour effet de décrémenter la profondeur actuelle et 
 // supprimer les variables de la profondeur précédente.
-int stable_block_exit();
+void stable_block_exit();
+
 /* ----------------------------------------------------------------------------
  * TEMPADDR
  * --------------------------------------------------------------------------*/
-int tempaddr_init();
+void tempaddr_init();
 int tempaddr_lock(stable_t* symbols);
 void tempaddr_unlock(stable_t* symbols, int addr);
 #endif

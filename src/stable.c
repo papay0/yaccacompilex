@@ -129,14 +129,17 @@ symbol_t* stable_find(stable_t* this, char* name)
 	return result;
 }
 
-int stable_setflags(stable_t* this, char* name, int flags)
+void stable_setflags(stable_t* this, char* name, int flags)
 {
 	symbol_t* symbol = stable_find(this, name);
-	if(symbol == NULL) return -1;
+	if(symbol == NULL)
+	{
+		print_debug("error: symbol %s not found, segfault inc !", name);
+	}
 	symbol->flags = flags;
 }
 
-int stable_print(stable_t* this)
+void stable_print(stable_t* this)
 {
 	symbol_t* current = this->first;
 	printf("ID      |Address |FLAGS   |DEPTH   |Type\n");
@@ -149,16 +152,15 @@ int stable_print(stable_t* this)
 		printf("\n");
 		current = current->next;
 	}
-	return -1;
 }
 
-int stable_block_enter(stable_t* this)
+void stable_block_enter(stable_t* this)
 {
 	print_debug("Entering block...\n");
 	this->current_depth++;	
 }
 
-int stable_block_exit(stable_t* this)
+void stable_block_exit(stable_t* this)
 {
 	print_debug("Exiting block... \n");
 	print_debug("Symbol table before exit : \n");
@@ -170,7 +172,7 @@ int stable_block_exit(stable_t* this)
  * TEMPADDR
  * --------------------------------------------------------------------------*/
 
-int tempaddr_init()
+void tempaddr_init()
 {
 	for(int i = 0; i < TEMPADDR_COUNT; i++)
 	{
@@ -228,3 +230,5 @@ int test_stable()
 
 	return 0;
 }
+
+
