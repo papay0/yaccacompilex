@@ -4,4 +4,6 @@
 // Affiche un message de warning
 void print_warning(const char*, ...);
 void print_debug(const char*, ...);
+void print_wnotes(const char*, ... );
+
 #endif

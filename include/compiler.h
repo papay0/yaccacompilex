@@ -24,6 +24,8 @@ void do_loadliteral(int literalValue, expression_t* r);
 void do_loadsymbol(const char* name, expression_t* r);
 void do_variable_declarations(type_t* type);
 void do_variable_affectations(expression_t* expr);
+void check_type_affect(type_t* dest, type_t* exprtype);
+
 type_t* do_makefunctype(type_t* return_type);
 
 // Variables globales

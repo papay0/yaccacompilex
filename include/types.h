@@ -49,6 +49,8 @@ type_t* type_create_primitive(char* name);
 
 type_t* type_create_func(type_t* return_type, type_t** arg_types, int argc);
 
+int type_compatible(type_t* t1, type_t* t2, int equals);
+
 int type_equals(type_t* t1, type_t* t2);
 
 void type_print(type_t* type);

@@ -29,6 +29,15 @@ int do_operation(expression_t e1, expression_t e2,
 	r->address = newaddr;
 
 	// TODO : type check
+	if(!type_compatible(e1.type, e2.type, 0))
+	{
+		print_warning("incompatible-pointer-types\n");
+		print_wnotes("note: cannot perform operation %s on types '", opname);
+		type_print(e1.type);
+		print_wnotes("' and '");
+		type_print(e2.type);
+		print_wnotes(".\n"); 
+	}
 	r->type = e1.type; // FIXME
 	return newaddr;
 }
@@ -45,15 +54,34 @@ int do_unary_operation(expression_t e1,
 	r->type = e1.type; // FIXME
 	return newaddr;
 }
-void do_affect(const char* symbol, expression_t expr, int unlock)
+
+void check_type_affect(type_t* dest, type_t* exprtype)
 {
+	if(!type_compatible(dest, exprtype, 0))
+	{
+		print_warning("incompatible-pointer-types : \n");
+		print_wnotes("note: types '");
+		type_print(dest);
+		print_wnotes("' and '");
+		type_print(exprtype);
+		print_wnotes("' are not compatible for affectation.\n"); 
+	}
+}
+
+void do_affect(const char* name, expression_t expr, int unlock)
+{
+	symbol_t* symbol = stable_find(symbols, name);
+	if(symbol == NULL) 	{
+		print_warning("symbol %s not found.", name);
+	}
 	int addr = expr.address;
-	int addr2 = stable_find(symbols, symbol)->address;
+	int addr2 = symbol->address;
+
 	printf("COP %d %d\n", addr2, addr);
 	
+	check_type_affect(expr.type, symbol->type);
 	if(unlock)
 		tempaddr_unlock(symbols, addr);
-	
 }
 
 void do_loadliteral(int literalValue, expression_t* r)

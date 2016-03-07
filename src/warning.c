@@ -22,10 +22,24 @@ void print_warning( const char* format, ... ) {
   if (DEBUG)
   {
     va_list args;
-    fprintf( stderr, "/!\\ Warning: " );
+    fprintf(stdout, "\033[1;32mwarning: " );
     va_start( args, format );
-    vfprintf( stderr, format, args );
+    vfprintf(stdout, format, args );
     va_end( args );
+	fprintf(stdout, "\033[0m");
   }
-  exit(0);
 }
+
+void print_wnotes(const char* format, ... ) {
+  if (DEBUG)
+  {
+    va_list args;
+    fprintf(stdout, "\033[1;32m\t" );
+    va_start( args, format );
+    vfprintf(stdout, format, args );
+    va_end( args );
+	fprintf(stdout, "\033[0m");
+  }
+}
+
+
