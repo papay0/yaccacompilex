@@ -1,6 +1,6 @@
 %token tINT tCHAR
 %token tAnd tOr tEquals tNotEquals tNot
-%token tPrint tIf tWhile tReturn 
+%token tPrint tIf tElse tWhile tReturn
 %token tSemi tComa tAffect tPlus tMinus tMult tDiv tAmpersand
 %token tPO tPC tAO tAC tCO tCC
 %token <number> tNumber 
@@ -21,8 +21,8 @@
 %left  tEquals tNotEquals
 %left  tPlus tMinus
 %left  tMult tDiv
- 
-%start Input 
+
+%start Input
 
 %{
 	#include <stdio.h>
@@ -30,8 +30,8 @@
 	void yyerror(char const * errorText);
 %}
 
-%union 
-{	
+%union
+{
         int number;
         char *string;
 	type_t* type;
@@ -56,12 +56,12 @@ BodyEnd		: 	tAC { stable_block_exit(symbols); };
 InstList	: 	Inst InstList
 			| Inst;
 
-Inst		:  	IVarDecl 
-			| IVarDeclAff 
+Inst		:  	IVarDecl
+			| IVarDeclAff
 			| IVarAff
 			| IFuncCall
-			| If 	
-			| While		
+			| If
+			| While
 			| Return
 			| Print;
 
@@ -72,11 +72,11 @@ IVarDecl	:	VarDecl tSemi;
 
 VarDecl		: 	VarDeclType IDList { do_variable_declarations($1); } ;
 
-IDList 		: 	VarDeclID SIDList 
+IDList 		: 	VarDeclID SIDList
 			| VarDeclID;
 
 SIDList  	: 	tComa VarDeclID SIDList
-			| tComa VarDeclID 
+			| tComa VarDeclID
 			;
 
 VarDeclID	:	tID { idbuffer_addstr($1); };
@@ -86,14 +86,16 @@ VarDeclType	:	Type { idbuffer_init();	$$ = $1; };
 IVarAff 	: 	Affect tSemi;
 
 
-Cond 		: 	Expr;
-If		: 	tIf tPO Cond tPC Body;
+Cond 		: 	Expr ;
+If		: 	tIf tPO Cond tPC Body
+      			| tIf tPO Cond tPC Body Else;
+Else  		:   	tElse Body;
 While		: 	tWhile tPO Cond tPC Body;
 Return		: 	tReturn Expr tSemi;
 Print		: 	tPrint tPO Expr tPC tSemi;
 Affect		: 	tID tAffect Expr { do_affect($1, $3, 0); $$.address = $3.address; };
 
-Expr 		:	Affect 
+Expr 		:	Affect
 			| tPO Expr tPC 		{ $$ = $2;}
 			| Expr tCO Expr tCC	{ do_indexing($1, $3, &$$); }
 			| tMult Expr		{ do_unary_operation($2, &$$, "COPA"); }
@@ -108,7 +110,7 @@ Expr 		:	Affect
 			| Expr tDiv Expr 	{ do_operation($1, $3, &$$, "DIV"); }
 			| FuncCallExpr
 			| tNumber { do_loadliteral($1, &$$); }
-			| tID { printf("%s\n", $1); do_loadsymbol($1, &$$); } 
+			| tID { printf("%s\n", $1); do_loadsymbol($1, &$$); }
 			;
 FuncCallExpr	: 	tID tPO Params tPC {
 
@@ -117,7 +119,7 @@ FuncCallExpr	: 	tID tPO Params tPC {
 TypedParams 	:	TypedParam STypedParams
 			| ;
 
-STypedParams	:	tComa TypedParam STypedParams 
+STypedParams	:	tComa TypedParam STypedParams
 			| tComa TypedParam;
 
 TypedParam	:	Type tID;
@@ -130,7 +132,7 @@ SParams 	: 	tComa Expr SParams
 
 Type 		:   	PrimType
 			| PtrType
-			| FuncType; 
+			| FuncType;
 
 FuncType	:	Type tPO tMult tPC tPO TypeList tPC { $$ = do_makefunctype($1); };
 
@@ -139,7 +141,7 @@ TypeList	:	STypeList {  }
 
 STypeList	: 	Type tComa STypeList { idbuffer_add($1); }
 			| Type { idbuffer_init(); idbuffer_add($1); };
-			
+
 
 PtrType 	:	Type tMult {
   $$ = type_create_ptr($1);
@@ -153,7 +155,7 @@ PrimType	:	tINT 	{ $$ = type_create_primitive("int"); }
 void yyerror(char const * errorText) { }
 int getMode();
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
 	// test_stable(); return 0;
 	if(getMode() == 0)
@@ -161,7 +163,7 @@ int main(int argc, char** argv)
 
 	if(getMode() == 1)
 		while(1)
-		{ 
+		{
 			ctx_init();
 			yyparse();
 			stable_print(symbols);

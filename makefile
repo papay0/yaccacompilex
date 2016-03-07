@@ -6,8 +6,8 @@ LDFLAGS=-g -ll
 
 all: bin/parser
 
-bin/parser: build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o
-	$(LD) build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o $(LDFLAGS) -o bin/parser
+bin/parser: build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o
+	$(LD) build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o $(LDFLAGS) -o bin/parser
 
 build/lex.yy.c: src/source.lex
 	flex src/source.lex
@@ -42,6 +42,9 @@ build/warning.o: src/warning.c include/warning.h
 
 build/instruction_stream.o: src/instruction_stream.c
 		$(CC) src/instruction_stream.c $(CCFLAGS) $(INCLUDE) -c -o build/instruction_stream.o
+
+build/ltable.o: src/ltable.c
+		$(CC) src/ltable.c $(CCFLAGS) $(INCLUDE) -c -o build/ltable.o
 
 clean:
 	rm build/*

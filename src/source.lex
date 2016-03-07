@@ -13,6 +13,7 @@ tINT 		"int"
 tCHAR		"char"
 tPrint 		"print"
 tIf 		"if"
+tElse		"else"
 tWhile 		"while"
 tReturn 	"return"
 tSemi 		";"
@@ -41,14 +42,15 @@ tNotEquals 	"!="
 {tCHAR}			{ p("CHAR{%s} ", yytext); 	return tCHAR; };
 {tPrint} 		{ p("Print{%s} ", yytext); 	return tPrint; };
 {tIf} 			{ p("If{%s} ", yytext); 	return tIf; };
+{tElse} 			{ p("Else{%s} ", yytext); 	return tElse; };
 {tWhile} 		{ p("While{%s} ", yytext); 	return tWhile; };
 {tReturn} 		{ p("Return{%s} ", yytext); return tReturn; };
-{tID} 			{ 
+{tID} 			{
 	// TODO gérer les fuites mémoires
-	char* newstr = malloc(sizeof(strlen(yytext)+1));	
+	char* newstr = malloc(sizeof(strlen(yytext)+1));
 	strcpy(newstr, yytext);
 	p("ID{%s} ", yytext); 	yylval.string = newstr;
-	return tID; 
+	return tID;
 };
 {tSemi} 		{ p("Semi{%s} ", yytext); 	return tSemi; };
 {tComa} 		{ p("Coma{%s} ", yytext); 	return tComa; };
