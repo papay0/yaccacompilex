@@ -52,7 +52,24 @@ int do_unary_operation(expression_t e1,
   	printf("%s %d %d\n", opname, newaddr, addr1);
 	r->address = newaddr;
 	// TODO : type check
-	r->type = e1.type; // FIXME
+	if(strcmp(opname, "COPA") == 0)
+	{
+		if(e1.type->kind != TYPE_KIND_POINTER)
+		{
+			print_warning("invalid-dereference: trying to dereference non-pointer type '");
+			type_print(e1.type);
+			print_wnotes("'.\n");
+		}
+		else
+		{
+			ptrtype_t* ptr = (ptrtype_t*)e1.type;
+			r->type = ptr->type;
+		}
+	}
+	else
+	{
+		r->type = e1.type; // FIXME
+	}
 	return newaddr;
 }
 
@@ -134,7 +151,7 @@ type_t* do_makefunctype(type_t* return_type)
 	return func;
 }
 
-void do_dereference(char* name, expression_t* r)
+void do_reference(char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
 	if(symbol == NULL) {
@@ -144,6 +161,15 @@ void do_dereference(char* name, expression_t* r)
 	r->address = tempaddr_lock(symbols);
 	printf("AFC %d %d\n", r->address, symbol->address);
 }
+
+void do_indexing(expression_t array, expression_t index, expression_t* r)
+{
+	expression_t tmp;
+	do_operation(array, index, &tmp, "ADD");
+	do_unary_operation(tmp, r, "COPA");	
+	printf("ptr %p\n", r->type);
+}
+/* arr[i] *(arr+i) */
 /*
 int main()
 {

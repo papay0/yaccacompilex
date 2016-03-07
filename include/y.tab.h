@@ -68,8 +68,10 @@ extern int yydebug;
     tPC = 278,
     tAO = 279,
     tAC = 280,
-    tNumber = 281,
-    tID = 282
+    tCO = 281,
+    tCC = 282,
+    tNumber = 283,
+    tID = 284
   };
 #endif
 /* Tokens.  */
@@ -96,8 +98,10 @@ extern int yydebug;
 #define tPC 278
 #define tAO 279
 #define tAC 280
-#define tNumber 281
-#define tID 282
+#define tCO 281
+#define tCC 282
+#define tNumber 283
+#define tID 284
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -111,7 +115,7 @@ union YYSTYPE
 	type_t* type;
 	expression_t expression;
 
-#line 115 "y.tab.h" /* yacc.c:1909  */
+#line 119 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

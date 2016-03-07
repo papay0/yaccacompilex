@@ -2,7 +2,7 @@
 %token tAnd tOr tEquals tNotEquals tNot
 %token tPrint tIf tWhile tReturn 
 %token tSemi tComa tAffect tPlus tMinus tMult tDiv tAmpersand
-%token tPO tPC tAO tAC
+%token tPO tPC tAO tAC tCO tCC
 %token <number> tNumber 
 %token <string> tID
 %type  <expression> Expr
@@ -86,7 +86,7 @@ VarDeclType	:	Type { idbuffer_init();	$$ = $1; };
 IVarAff 	: 	Affect tSemi;
 
 
-Cond 		: 	Expr ;
+Cond 		: 	Expr;
 If		: 	tIf tPO Cond tPC Body;
 While		: 	tWhile tPO Cond tPC Body;
 Return		: 	tReturn Expr tSemi;
@@ -95,8 +95,9 @@ Affect		: 	tID tAffect Expr { do_affect($1, $3, 0); $$.address = $3.address; };
 
 Expr 		:	Affect 
 			| tPO Expr tPC 		{ $$ = $2;}
+			| Expr tCO Expr tCC	{ do_indexing($1, $3, &$$); }
 			| tMult Expr		{ do_unary_operation($2, &$$, "COPA"); }
-			| tAmpersand tID	{ do_dereference($2, &$$); }
+			| tAmpersand tID	{ do_reference($2, &$$); }
 			| Expr tEquals Expr 	{ do_operation($1, $3, &$$, "EQ"); }
 			| Expr tNotEquals Expr 	{ do_operation($1, $3, &$$, "NEQ"); }
 			| Expr tAnd Expr 	{ do_operation($1, $3, &$$, "AND"); }
