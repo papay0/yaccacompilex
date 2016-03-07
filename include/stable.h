@@ -42,7 +42,7 @@ typedef struct tempaddr {
  * GLOBALES
  * -----------------------------------------------------*/
 
-#define TEMPADDR_COUNT 4
+#define TEMPADDR_COUNT 128
 tempaddr_t tempaddr[TEMPADDR_COUNT];
 
 /* -------------------------------------------------------
