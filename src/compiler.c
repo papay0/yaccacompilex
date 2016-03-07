@@ -8,7 +8,7 @@
 void ctx_init()
 {
 	ctx.depth = 0;
-	tempaddr_init();	
+	tempaddr_init();
 	symbols = stable_new();
 	istream_open();
 }
@@ -16,9 +16,9 @@ void ctx_init()
 void ctx_close()
 {
 	istream_close();
-	
+
 }
-int do_operation(expression_t e1, expression_t e2, 
+int do_operation(expression_t e1, expression_t e2,
 	expression_t* r, char* opname)
 {
 	int addr1 = e1.address;
@@ -37,13 +37,13 @@ int do_operation(expression_t e1, expression_t e2,
 		type_print(e1.type);
 		print_wnotes("' and '");
 		type_print(e2.type);
-		print_wnotes(".\n"); 
+		print_wnotes(".\n");
 	}
 	r->type = e1.type; // FIXME
 	return newaddr;
 }
 
-int do_unary_operation(expression_t e1, 
+int do_unary_operation(expression_t e1,
 	expression_t* r, char* opname)
 {
 	int addr1 = e1.address;
@@ -65,7 +65,7 @@ void check_type_affect(type_t* dest, type_t* exprtype)
 		type_print(dest);
 		print_wnotes("' and '");
 		type_print(exprtype);
-		print_wnotes("' are not compatible for affectation.\n"); 
+		print_wnotes("' are not compatible for affectation.\n");
 	}
 }
 
@@ -79,7 +79,7 @@ void do_affect(char* name, expression_t expr, int unlock)
 	int addr2 = symbol->address;
 
 	printf("COP %d %d\n", addr2, addr);
-	
+
 	check_type_affect(expr.type, symbol->type);
 	if(unlock)
 		tempaddr_unlock(symbols, addr);
@@ -97,7 +97,7 @@ void do_loadsymbol( char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
 	if(symbol == NULL) {
-		print_warning("symbol %s not found.", name);
+		print_warning("symbol %s not found.\n", name);
 	}
 	int addr = tempaddr_lock(symbols);
 	printf("COP %d %d\n", addr, symbol->address);
@@ -123,14 +123,14 @@ void do_variable_affectations(expression_t* expr)
 	}
 }
 
-type_t* do_makefunctype(type_t* return_type) 
+type_t* do_makefunctype(type_t* return_type)
 {
   	type_t** args = (type_t**)malloc(sizeof(type_t*)*idbuffer_size());
   	for(int i = 0; i < idbuffer_size(); i++)
 	{
     	args[idbuffer_size() - i - 1] = idbuffer_get(i);
 	}
-	type_t* func = type_create_func(return_type, args, idbuffer_size()); 
+	type_t* func = type_create_func(return_type, args, idbuffer_size());
 	return func;
 }
 
@@ -141,7 +141,7 @@ void do_dereference(char* name, expression_t* r)
 		print_warning("symbol %s not found.", name);
 	}
 	r->type = type_create_ptr(symbol->type);
-	r->address = tempaddr_lock(symbols);	
+	r->address = tempaddr_lock(symbols);
 	printf("AFC %d %d\n", r->address, symbol->address);
 }
 /*
