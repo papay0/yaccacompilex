@@ -28,6 +28,7 @@ tPC 		")"
 tAO 		"{"
 tAC 		"}"
 tAnd		"&&"
+tAmpersand	"&"
 tOr			"||"
 tNot		"!"
 tNotEquals 	"!="
@@ -65,8 +66,9 @@ tNotEquals 	"!="
 {tPO} 			{ p("PO{%s} ", yytext); 	return tPO; };
 {tPC} 			{ p("PC{%s} ", yytext); 	return tPC; };
 {tAO} 			{ p("AO{%s} ", yytext); 	return tAO; };
-{tAC} 			{ p("AC{%s} ", yytext); 	return tAC;};
+{tAC} 			{ p("AC{%s} ", yytext); 	return tAC; };
 {tAnd}			{ p("And{%s} ", yytext);	return tAnd;};
+{tAmpersand}	{ p("Ampersand{%s}", yytext); return tAmpersand; };
 {tOr}			{ p("Or{%s} ", yytext);		return tOr;};
 
 . ;

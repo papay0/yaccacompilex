@@ -63,12 +63,13 @@ extern int yydebug;
     tMinus = 273,
     tMult = 274,
     tDiv = 275,
-    tPO = 276,
-    tPC = 277,
-    tAO = 278,
-    tAC = 279,
-    tNumber = 280,
-    tID = 281
+    tAmpersand = 276,
+    tPO = 277,
+    tPC = 278,
+    tAO = 279,
+    tAC = 280,
+    tNumber = 281,
+    tID = 282
   };
 #endif
 /* Tokens.  */
@@ -90,12 +91,13 @@ extern int yydebug;
 #define tMinus 273
 #define tMult 274
 #define tDiv 275
-#define tPO 276
-#define tPC 277
-#define tAO 278
-#define tAC 279
-#define tNumber 280
-#define tID 281
+#define tAmpersand 276
+#define tPO 277
+#define tPC 278
+#define tAO 279
+#define tAC 280
+#define tNumber 281
+#define tID 282
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -109,7 +111,7 @@ union YYSTYPE
 	type_t* type;
 	expression_t expression;
 
-#line 113 "y.tab.h" /* yacc.c:1909  */
+#line 115 "y.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

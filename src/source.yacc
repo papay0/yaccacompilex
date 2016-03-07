@@ -1,7 +1,7 @@
 %token tINT tCHAR
 %token tAnd tOr tEquals tNotEquals tNot
 %token tPrint tIf tWhile tReturn 
-%token tSemi tComa tAffect tPlus tMinus tMult tDiv
+%token tSemi tComa tAffect tPlus tMinus tMult tDiv tAmpersand
 %token tPO tPC tAO tAC
 %token <number> tNumber 
 %token <string> tID
@@ -93,8 +93,10 @@ Return		: 	tReturn Expr tSemi;
 Print		: 	tPrint tPO Expr tPC tSemi;
 Affect		: 	tID tAffect Expr { do_affect($1, $3, 0); $$.address = $3.address; };
 
-Expr 		:	Affect {  } 
+Expr 		:	Affect 
 			| tPO Expr tPC 		{ $$ = $2;}
+			| tMult Expr		{ do_unary_operation($2, &$$, "COPA"); }
+			| tAmpersand tID	{ do_dereference($2, &$$); }
 			| Expr tEquals Expr 	{ do_operation($1, $3, &$$, "EQ"); }
 			| Expr tNotEquals Expr 	{ do_operation($1, $3, &$$, "NEQ"); }
 			| Expr tAnd Expr 	{ do_operation($1, $3, &$$, "AND"); }

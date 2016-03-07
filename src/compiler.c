@@ -33,6 +33,18 @@ int do_operation(expression_t e1, expression_t e2,
 	return newaddr;
 }
 
+int do_unary_operation(expression_t e1, 
+	expression_t* r, const char* opname)
+{
+	int addr1 = e1.address;
+  	tempaddr_unlock(symbols, addr1);
+  	int newaddr = tempaddr_lock(symbols);
+  	printf("%s %d %d\n", opname, newaddr, addr1);
+	r->address = newaddr;
+	// TODO : type check
+	r->type = e1.type; // FIXME
+	return newaddr;
+}
 void do_affect(const char* symbol, expression_t expr, int unlock)
 {
 	int addr = expr.address;
@@ -58,8 +70,10 @@ void do_loadsymbol(const char* name, expression_t* r)
 	if(symbol == NULL) {
 		print_warning("symbol %s not found.", name);
 	}
+	int addr = tempaddr_lock(symbols);
+	printf("COP %d %d\n", addr, symbol->address);
 	r->type = symbol->type;
-	r->address = symbol->address;
+	r->address = addr;
 }
 
 
@@ -89,6 +103,17 @@ type_t* do_makefunctype(type_t* return_type)
 	}
 	type_t* func = type_create_func(return_type, args, idbuffer_size()); 
 	return func;
+}
+
+void do_dereference(const char* name, expression_t* r)
+{
+	symbol_t* symbol = stable_find(symbols, name);
+	if(symbol == NULL) {
+		print_warning("symbol %s not found.", name);
+	}
+	r->type = type_create_ptr(symbol->type);
+	r->address = tempaddr_lock(symbols);	
+	printf("AFC %d %d\n", r->address, symbol->address);
 }
 /*
 int main()
