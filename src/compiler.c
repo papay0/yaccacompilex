@@ -166,7 +166,7 @@ void do_indexing(expression_t array, expression_t index, expression_t* r)
 {
 	expression_t tmp;
 	do_operation(array, index, &tmp, "ADD");
-	do_unary_operation(tmp, r, "COPA");	
+	do_unary_operation(tmp, r, "COPA");
 	printf("ptr %p\n", r->type);
 }
 /* arr[i] *(arr+i) */
