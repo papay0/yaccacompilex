@@ -12,6 +12,13 @@ const int TYPE_KIND_PRIMITIVE;
 const int TYPE_KIND_POINTER;
 const int TYPE_KIND_FUNCTION;
 
+const int OPTYPE_ARITHMETICS;
+const int OPTYPE_AFFECT;	
+const int OPTYPE_EQUALS;
+const int OPTYPE_LOGIC;
+const int OPTYPE_STRICT;
+
+
 // Taille des types primitifs en octets.
 const int PRIM_SIZES[2];
 const int PRIM_CHAR;

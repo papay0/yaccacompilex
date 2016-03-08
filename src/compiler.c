@@ -30,7 +30,7 @@ int do_operation(expression_t e1, expression_t e2,
 	r->address = newaddr;
 
 	// TODO : type check
-	if(!type_compatible(e1.type, e2.type, 0))
+	if(!type_compatible(e1.type, e2.type, type_getoptype(opname)))
 	{
 		print_warning("incompatible-pointer-types\n");
 		print_wnotes("note: cannot perform operation %s on types '", opname);
@@ -73,9 +73,9 @@ int do_unary_operation(expression_t e1,
 	return newaddr;
 }
 
-void check_type_affect(type_t* dest, type_t* exprtype)
+void check_type_affect(type_t* exprtype, type_t* dest)
 {
-	if(!type_compatible(dest, exprtype, 0))
+	if(!type_compatible(dest, exprtype, OPTYPE_AFFECT))
 	{
 		print_warning("incompatible-pointer-types : \n");
 		print_wnotes("note: types '");
