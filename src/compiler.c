@@ -45,21 +45,14 @@ int do_operation(expression_t e1, expression_t e2,
 }
 
 void do_if(expression_t cond){
-	// Comment avoir l'adresse de la fin de body ?
-	// ==> Voir le pointeur d'instruction qui a du être maj dans le istream_printf
-
-	//printf("Normalement le IF est fini avant le body\n");
-	print_warning("address de ma condition = %d\n", cond.address);
+	istream_printf("JMF %d %d\n", cond.address, labels->index);
 	ltable_add(labels, -1);
-	//ltable_print(labels);
 }
 
 void do_body(){
 	printf("Je suis dans do_body et PC = %d\n", get_pc());
-	// Ici je cherche le premier -1 dans ma table et je mets PC
 	int last_index = -1;
 	for (int i = 0; i < labels->index; i++) {
-			//printf("i = %d, address = %d\n", i, this->labels[i]);
 			if (labels->labels[i] == -1) {
 				last_index = i;
 			}
