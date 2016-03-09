@@ -6,7 +6,6 @@ static int pc = 0;
 void istream_open() {
   fp = fopen ("bin/yaccacompilex", "w+");
 }
-
 // void istream_printf(char* format, ... ) {
 //     va_list args;
 //     fprintf( fp, "/!\\ Warning: " );

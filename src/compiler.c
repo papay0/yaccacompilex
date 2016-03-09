@@ -26,7 +26,7 @@ int do_operation(expression_t e1, expression_t e2,
   	tempaddr_unlock(symbols, addr1);
   	tempaddr_unlock(symbols, addr2);
   	int newaddr = tempaddr_lock(symbols);
-		istream_printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
+	istream_printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
   	//printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
 	r->address = newaddr;
 
@@ -77,7 +77,7 @@ int do_unary_operation(expression_t e1,
   	tempaddr_unlock(symbols, addr1);
   	int newaddr = tempaddr_lock(symbols);
   	//printf("%s %d %d\n", opname, newaddr, addr1);
-		istream_printf("%s %d %d\n", opname, newaddr, addr1);
+	istream_printf("%s %d %d\n", opname, newaddr, addr1);
 	r->address = newaddr;
 	// TODO : type check
 	if(strcmp(opname, "COPA") == 0)
