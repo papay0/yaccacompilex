@@ -3,9 +3,10 @@
 %token tPrint tIf tElse tWhile tReturn
 %token tSemi tComa tAffect tPlus tMinus tMult tDiv tAmpersand
 %token tPO tPC tAO tAC tCO tCC
-%token <number> tNumber 
+%token <number> tNumber
 %token <string> tID
 %type  <expression> Expr
+%type  <expression> Cond
 %type  <expression> Affect
 %type  <expression> FuncCallExpr
 %type  <type> Type
@@ -86,8 +87,8 @@ VarDeclType	:	Type { idbuffer_init();	$$ = $1; };
 IVarAff 	: 	Affect tSemi;
 
 
-Cond 		: 	Expr ;
-If		: 	tIf tPO Cond tPC Body
+Cond 		: 	Expr {do_if($1);} ;
+If		: 	tIf tPO Cond tPC Body { do_body(); }
       			| tIf tPO Cond tPC Body Else;
 Else  		:   	tElse Body;
 While		: 	tWhile tPO Cond tPC Body;

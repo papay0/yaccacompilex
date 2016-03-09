@@ -6,3 +6,4 @@
 void istream_open();
 void istream_printf(char* format, ... );
 void istream_close();
+int get_pc();

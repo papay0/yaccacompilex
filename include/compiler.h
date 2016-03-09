@@ -2,6 +2,7 @@
 #define COMPILER_H
 
 #include "stable.h"
+#include "ltable.h"
 #include "idbuffer.h"
 #include "types.h"
 
@@ -26,10 +27,15 @@ void do_variable_declarations(type_t* type);
 void do_variable_affectations(expression_t* expr);
 void check_type_affect(type_t* dest, type_t* exprtype);
 
+// Test de fonction pour le if, table des labels
+void do_if(expression_t e);
+void do_body();
+
 type_t* do_makefunctype(type_t* return_type);
 
 // Variables globales
 context_t ctx;
 stable_t* symbols;
+ltable_t* labels;
 
 #endif
