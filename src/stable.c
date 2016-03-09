@@ -142,28 +142,34 @@ void stable_setflags(stable_t* this, char* name, int flags)
 void stable_print(stable_t* this)
 {
 	symbol_t* current = this->first;
-	printf("ID      |Address |FLAGS   |DEPTH   |Type\n");
+	printf("--------------  Symbols Table  -------------\n");
+	printf("| ID      |Address |FLAGS   |DEPTH   | Type \n");
 	while(current != NULL)
 	{
 
-		printf("%8s|%8d|%8d|%8d|", current->name, current->address,
+		printf("| %8s|%8d|%8d|%8d| ", current->name, current->address,
 				current->flags, current->depth);
 		type_print(current->type);
 		printf("\n");
 		current = current->next;
 	}
+	printf("--------------------------------------------\n");
 }
 
 void stable_block_enter(stable_t* this)
 {
-	print_debug("Entering block...\n");
-	this->current_depth++;	
+	char* tab = get_tab();
+	print_debug("%sEntering block...\n", tab);
+	this->current_depth++;
+	add_tab();
 }
 
 void stable_block_exit(stable_t* this)
 {
-	print_debug("Exiting block... \n");
-	print_debug("Symbol table before exit : \n");
+	remove_tab();
+	char* tab = get_tab();
+	print_debug("%sExiting block... \n", tab);
+	print_debug("%sSymbol table before exit : \n", tab);
 	stable_print(this);
 	stable_remove(this, this->current_depth);
 	this->current_depth--;
@@ -177,7 +183,7 @@ void tempaddr_init()
 	for(int i = 0; i < TEMPADDR_COUNT; i++)
 	{
 		tempaddr[i].locked = 0;
-		tempaddr[i].id = i;				
+		tempaddr[i].id = i;
 	}
 }
 
@@ -230,5 +236,3 @@ int test_stable()
 
 	return 0;
 }
-
-
