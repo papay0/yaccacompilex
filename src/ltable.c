@@ -12,9 +12,11 @@ void ltable_add(ltable_t* this, int address) {
 }
 
 void ltable_print(ltable_t* this) {
-  printf("---------- Table labels DEBUT ---------\n");
-    for (int i = 0; i < this->index; i++) {
-        printf("i = %d, address = %d\n", i, this->labels[i]);
-    }
-  printf("---------- Table labels FIN   ---------\n");
+  printf("--------------  Labels Table  --------------\n");
+	printf("| ID                 |  Address            |\n");
+  for (int i = 0; i < this->index; i++) {
+    printf("|%20d|%21d|\n", i, this->labels[i]);
+  }
+  printf("--------------------------------------------\n");
+  // test : int main(){ int a = 1; if (a==2){ int b = 2; } }
 }

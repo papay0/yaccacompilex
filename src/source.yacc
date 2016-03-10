@@ -111,8 +111,9 @@ Expr            :       Affect
                         | Expr tDiv Expr        { do_operation($1, $3, &$$, "DIV"); }
                         | FuncCallExpr
                         | tNumber { do_loadliteral($1, &$$); }
-                        | tID { printf("%s\n", $1); do_loadsymbol($1, &$$); }
+                        | tID { do_loadsymbol($1, &$$); }
                         ;
+
 FuncCallExpr    :       tID tPO Params tPC {
 
 };
@@ -158,19 +159,19 @@ int getMode();
 
 int main(int argc, char** argv)
 {
-        // test_stable(); return 0;
-        if(getMode() == 0)
-                while(1) { yylex(); }
+	// test_stable(); return 0;
+	if(getMode() == 0)
+		while(1) { yylex(); }
 
-        if(getMode() == 1)
-                while(1)
-                {
-                        ctx_init();
-                        yyparse();
-                        stable_print(symbols);
-                        printf("New parse...\n");
-                        ctx_close();
-                }
+	if(getMode() == 1)
+		{
+			ctx_init();
+			yyparse();
+			stable_print(symbols);
+			ltable_print(labels);
+			printf("I write in the file\n");
+			ctx_close();
+		}
 
-        return 0;
+	return 0;
 }

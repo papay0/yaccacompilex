@@ -27,7 +27,6 @@ int do_operation(expression_t e1, expression_t e2,
   	tempaddr_unlock(symbols, addr2);
   	int newaddr = tempaddr_lock(symbols);
 	istream_printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
-  	//printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
 	r->address = newaddr;
 
 	// TODO : type check
@@ -45,21 +44,13 @@ int do_operation(expression_t e1, expression_t e2,
 }
 
 void do_if(expression_t cond){
-	// Comment avoir l'adresse de la fin de body ?
-	// ==> Voir le pointeur d'instruction qui a du être maj dans le istream_printf
-
-	//printf("Normalement le IF est fini avant le body\n");
-	print_warning("address de ma condition = %d\n", cond.address);
+	istream_printf("JMF %d %d\n", cond.address, labels->index);
 	ltable_add(labels, -1);
-	//ltable_print(labels);
 }
 
 void do_body(){
-	printf("Je suis dans do_body et PC = %d\n", get_pc());
-	// Ici je cherche le premier -1 dans ma table et je mets PC
 	int last_index = -1;
 	for (int i = 0; i < labels->index; i++) {
-			//printf("i = %d, address = %d\n", i, this->labels[i]);
 			if (labels->labels[i] == -1) {
 				last_index = i;
 			}
@@ -123,7 +114,6 @@ void do_affect(char* name, expression_t expr, int unlock)
 	int addr = expr.address;
 	int addr2 = symbol->address;
 
-	//printf("COP %d %d\n", addr2, addr);
 	istream_printf("COP %d %d\n", addr2, addr);
 
 	check_type_affect(expr.type, symbol->type);
@@ -135,7 +125,6 @@ void do_loadliteral(int literalValue, expression_t* r)
 {
 	int addr = tempaddr_lock(symbols);
 	istream_printf("AFC %d %d\n", addr, literalValue);
-  	//printf("AFC %d %d\n", addr, literalValue);
   	r->address = addr;
   	r->type = type_create_primitive("int");
 }
@@ -147,7 +136,6 @@ void do_loadsymbol( char* name, expression_t* r)
 		print_warning("symbol %s not found.\n", name);
 	}
 	int addr = tempaddr_lock(symbols);
-	//printf("COP %d %d\n", addr, symbol->address);
 	istream_printf("COP %d %d\n", addr, symbol->address);
 	r->type = symbol->type;
 	r->address = addr;
@@ -190,7 +178,6 @@ void do_reference(char* name, expression_t* r)
 	}
 	r->type = type_create_ptr(symbol->type);
 	r->address = tempaddr_lock(symbols);
-	//printf("AFC %d %d\n", r->address, symbol->address);
 	istream_printf("AFC %d %d\n", r->address, symbol->address);
 }
 
@@ -199,7 +186,6 @@ void do_indexing(expression_t array, expression_t index, expression_t* r)
 	expression_t tmp;
 	do_operation(array, index, &tmp, "ADD");
 	do_unary_operation(tmp, r, "COPA");
-	//printf("ptr %p\n", r->type);
 	istream_printf("ptr %p\n", r->type);
 }
 /* arr[i] *(arr+i) */
