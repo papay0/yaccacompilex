@@ -48,3 +48,4 @@ build/ltable.o: src/ltable.c
 
 clean:
 	rm build/*
+	rm bin/yaccacompilex
