@@ -105,7 +105,7 @@ void check_type_affect(type_t* exprtype, type_t* dest)
 	}
 }
 
-void do_affect(char* name, expression_t expr, int unlock)
+void do_affect(char* name, expression_t expr, int op)
 {
 	symbol_t* symbol = stable_find(symbols, name);
 	if(symbol == NULL) 	{
@@ -113,12 +113,20 @@ void do_affect(char* name, expression_t expr, int unlock)
 	}
 	int addr = expr.address;
 	int addr2 = symbol->address;
-
-	istream_printf("COP %d %d\n", addr2, addr);
+	if((op & DOAFFECT_DEREFERENCE) != 0) 
+	{
+		istream_printf("COPB %d %d\n", addr2, addr);
+	} 
+	else 
+	{
+		istream_printf("COP %d %d\n", addr2, addr);
+	}
 
 	check_type_affect(expr.type, symbol->type);
-	if(unlock)
+	if((op & DOAFFECT_UNLOCK) != 0) 
+	{ 
 		tempaddr_unlock(symbols, addr);
+	}
 }
 
 void do_loadliteral(int literalValue, expression_t* r)
@@ -155,7 +163,17 @@ void do_variable_affectations(expression_t* expr)
 	for(int i = 0; i < idbuffer_size(); i++)
 	{
 		char* symbol = (char*)idbuffer_get(i);
-		do_affect(symbol, *expr, 1);
+		do_affect(symbol, *expr, DOAFFECT_UNLOCK);
+	}
+}
+
+void do_array_declaration(type_t* type, char* name, int size)
+{
+	type_t* arrtype = type_create_ptr(type);
+	stable_add(symbols, name, arrtype);
+	for(int j = 1; j < size; j++)
+	{
+		stable_add(symbols, "<array>", arrtype);
 	}
 }
 
@@ -186,7 +204,6 @@ void do_indexing(expression_t array, expression_t index, expression_t* r)
 	expression_t tmp;
 	do_operation(array, index, &tmp, "ADD");
 	do_unary_operation(tmp, r, "COPA");
-	istream_printf("ptr %p\n", r->type);
 }
 /* arr[i] *(arr+i) */
 /*

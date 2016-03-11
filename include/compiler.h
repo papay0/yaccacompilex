@@ -20,7 +20,10 @@ int do_operation(expression_t e1, expression_t e2, expression_t* r, char* opname
 // Génère le code d'une affectation du symbole donné à l'expression donnée.
 // Si unlock = 1 : la variable temporaire est releasée (cas d'une instruction d'affectation)
 // Si unlock = 0 : la variable temporaire n'est pas releasée (cas d'une expression d'affectation)
-void do_affect(char* symbol, expression_t expr, int unlock);
+#define DOAFFECT_NONE		0x0
+#define DOAFFECT_UNLOCK 	0x1
+#define DOAFFECT_DEREFERENCE	0x2
+void do_affect(char* symbol, expression_t expr, int op);
 void do_loadliteral(int literalValue, expression_t* r);
 void do_loadsymbol(char* name, expression_t* r);
 void do_variable_declarations(type_t* type);

@@ -86,7 +86,7 @@ void stable_add(stable_t* this, char* name, type_t* type)
 {
 	symbol_t* sameSymbol = stable_find(this, name);
 	int depth = this->current_depth;
-	if (sameSymbol != NULL && sameSymbol->depth == depth)
+	if (sameSymbol != NULL && sameSymbol->depth == depth && (strcmp(name, "<array>") != 0))
 	{
 		print_warning("Variable %s existe deja dans la même portée.\n", name);
 	}

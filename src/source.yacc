@@ -52,7 +52,7 @@ Body            :       BodyStart InstList BodyEnd
                         | BodyStart BodyEnd;
 
 BodyStart       :       tAO { stable_block_enter(symbols); };
-BodyEnd         :       tAC { stable_block_exit(symbols); };
+BodyEnd         :       tAC { stable_block_exit(symbols); stable_print(symbols); };
 
 InstList        :       Inst InstList
                         | Inst;
@@ -71,7 +71,8 @@ IFuncCall       :       FuncCallExpr tSemi;
 IVarDeclAff     :       VarDecl tAffect Expr tSemi { do_variable_affectations(&$3); };
 IVarDecl        :       VarDecl tSemi;
 
-VarDecl         :       VarDeclType IDList { do_variable_declarations($1); } ;
+VarDecl         :       VarDeclType IDList { do_variable_declarations($1); }
+			| VarDeclType tID tCO tNumber tCC { do_array_declaration($1, $2, $4); };
 
 IDList          :       VarDeclID SIDList
                         | VarDeclID;
@@ -87,14 +88,15 @@ VarDeclType     :       Type { idbuffer_init(); $$ = $1; };
 IVarAff         :       Affect tSemi;
 
 
-Cond            :       Expr {do_if($1);} ;
+Cond            :       Expr {do_if($1);} 
 If              :       tIf tPO Cond tPC Body { do_body(); }
                         | tIf tPO Cond tPC Body Else;
 Else            :       tElse Body;
 While           :       tWhile tPO Cond tPC Body;
 Return          :       tReturn Expr tSemi;
 Print           :       tPrint tPO Expr tPC tSemi;
-Affect          :       tID tAffect Expr { do_affect($1, $3, 0); $$.address = $3.address; };
+Affect          :       tID tAffect Expr { do_affect($1, $3, DOAFFECT_NONE); $$.address = $3.address; }
+			| tMult tID tAffect Expr { do_affect($2, $4, DOAFFECT_DEREFERENCE); $$.address = $4.address; };
 
 Expr            :       Affect
                         | tPO Expr tPC          { $$ = $2;}
