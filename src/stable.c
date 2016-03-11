@@ -203,9 +203,7 @@ int tempaddr_lock(stable_t* symbols)
 			else
 			{
 				tempaddr[i].address = symbols->last->address + 1 + i;
-				print_debug("lock_tempaddr: symbols last %d\n", symbols->last->address);
 			}
-			print_debug("lock_tempaddr: locked address %d\n", tempaddr[i].address);
 			return tempaddr[i].address;
 		}
 	}
