@@ -28,8 +28,12 @@ void do_variable_affectations(expression_t* expr);
 void check_type_affect(type_t* dest, type_t* exprtype);
 
 // Test de fonction pour le if, table des labels
-void do_if(expression_t e);
+void do_if(expression_t cond);
+void do_while(expression_t cond);
+void do_before_while();
+void do_after_while();
 void do_body();
+void do_body_while();
 
 type_t* do_makefunctype(type_t* return_type);
 

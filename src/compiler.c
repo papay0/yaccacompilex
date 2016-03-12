@@ -43,10 +43,65 @@ int do_operation(expression_t e1, expression_t e2,
 	return newaddr;
 }
 
-void do_if(expression_t cond){
+void do_if(expression_t cond) {
+	// labels->index est l'index courant du tableau de labels.
+	// Puis j'incremente l'index dans le ltable_add();
 	istream_printf("JMF %d %d\n", cond.address, labels->index);
 	ltable_add(labels, -1);
 }
+
+void do_while(expression_t cond) {
+	// Pour le moment c'est le même code que le do_if()
+	istream_printf("JMF %d %d\n", cond.address, labels->index);
+	ltable_add(labels, -1);
+}
+
+void do_after_while() {
+	printf("I am after close parenthèse while\n");
+}
+
+void do_body_while(expression_t cond) {
+	printf("I am after body while\n");
+	printf("Ici je dois JMP to label qui a été décléré dans do_while\n");
+	printf("<=> avant la condition du while\n");
+	int index = do_body_return_index()-1;
+	printf("Mon dex où je dois JMP est : %d\n", index);
+	istream_printf("JMP %d %d\n", cond.address, index); // [JMP] [la_variable_a_regarder] [la_ligne_où_sauter]
+	//do_body(); // Mets PC dans la ligne du dernier -1
+}
+
+void do_before_while() {
+		ltable_add(labels, get_pc()+1); // ça c'est juste
+		printf("I am before open parenthèse while\n");
+		// [1] --> create label (get_pc()) // DONE (= do_before_while())
+		// [2] --> JMF (-1)
+		// [3] --> JMP [1]
+		// [4] --> mettre PC dans le dernier -1 (comme do_body())
+		// while([1]   1==2)[2]{
+		// 	printf("TRUC TRUC\n");
+		// 	[3]
+		// }
+		// [4]
+		// int a = 3;
+
+}
+		//istream_printf("JMT %d %d\n", cond.address, labels->index);
+
+/*
+[1] add label before cond_while {
+	JMF [2]
+}
+[2] add label after body {
+	add_label()
+	do_body()
+}
+
+	while [1](1==1)  {
+
+	JMP
+	}
+[2]
+*/
 
 void do_body(){
 	int last_index = -1;
@@ -57,6 +112,18 @@ void do_body(){
 	}
 	labels->labels[last_index] = get_pc();
 	ltable_print(labels);
+}
+
+int do_body_return_index(){
+	int last_index = -1;
+	for (int i = 0; i < labels->index; i++) {
+			if (labels->labels[i] == -1) {
+				last_index = i;
+			}
+	}
+	labels->labels[last_index] = get_pc();
+	ltable_print(labels);
+	return last_index;
 }
 
 
