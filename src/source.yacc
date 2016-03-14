@@ -29,6 +29,7 @@
 %{
         #include <stdio.h>
         #include "compiler.h"
+        #include "ltable.h"
         void yyerror(char const * errorText);
 %}
 
@@ -164,18 +165,21 @@ int getMode();
 
 int main(int argc, char** argv)
 {
+  //ltable_t* labels_global;
 	// test_stable(); return 0;
 	if(getMode() == 0)
 		while(1) { yylex(); }
 
 	if(getMode() == 1)
 		{
-			ctx_init();
+      //labels_global = ltable_new();
+			//ctx_init(labels_global);
+      ctx_init();
 			yyparse();
 			stable_print(symbols);
 			ltable_print(labels);
-			printf("I write in the file\n");
 			ctx_close();
+      update_label(labels);
 		}
 
 	return 0;

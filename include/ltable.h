@@ -9,5 +9,6 @@ typedef struct ltable {
 ltable_t* ltable_new();
 void ltable_add(ltable_t* this, int address);
 void ltable_print(ltable_t* this);
+int get_value_at_index(ltable_t* this, int index);
 
 #endif
