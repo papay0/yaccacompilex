@@ -51,7 +51,6 @@ void do_if(expression_t cond) {
 }
 
 void do_while(expression_t cond) {
-	// Pour le moment c'est le même code que le do_if()
 	istream_printf("JMF %d %d\n", cond.address, labels->index);
 	ltable_add(labels, -1);
 }
@@ -65,14 +64,13 @@ void do_body_while(expression_t cond) {
 	printf("Ici je dois JMP to label qui a été décléré dans do_while\n");
 	printf("<=> avant la condition du while\n");
 	int index = do_body_return_index()-1;
-	printf("Mon dex où je dois JMP est : %d\n", index);
-	istream_printf("JMP %d %d\n", cond.address, index); // [JMP] [la_variable_a_regarder] [la_ligne_où_sauter]
-	//do_body(); // Mets PC dans la ligne du dernier -1
+	istream_printf("JMP %d\n", index);
 }
 
 void do_before_while() {
-		ltable_add(labels, get_pc()+1); // ça c'est juste
+		ltable_add(labels, get_pc());
 		printf("I am before open parenthèse while\n");
+	}
 		// [1] --> create label (get_pc()) // DONE (= do_before_while())
 		// [2] --> JMF (-1)
 		// [3] --> JMP [1]
@@ -83,25 +81,6 @@ void do_before_while() {
 		// }
 		// [4]
 		// int a = 3;
-
-}
-		//istream_printf("JMT %d %d\n", cond.address, labels->index);
-
-/*
-[1] add label before cond_while {
-	JMF [2]
-}
-[2] add label after body {
-	add_label()
-	do_body()
-}
-
-	while [1](1==1)  {
-
-	JMP
-	}
-[2]
-*/
 
 void do_body(){
 	int last_index = -1;
@@ -121,7 +100,7 @@ int do_body_return_index(){
 				last_index = i;
 			}
 	}
-	labels->labels[last_index] = get_pc();
+	labels->labels[last_index] = get_pc()+1;
 	ltable_print(labels);
 	return last_index;
 }
