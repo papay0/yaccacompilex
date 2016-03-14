@@ -8,7 +8,7 @@
 
 const int SYMBOL_INITIALIZED 		= 0x01;
 const int SYMBOL_CONST			= 0x02;
-const int SYMBOL_LOCAL			= 0x04;
+const int SYMBOL_GLOBAL			= 0x04;
 const int SYMBOL_STATIC			= 0x08;
 const int SYMBOL_FUNC			= 0x10;
 
@@ -139,6 +139,15 @@ void stable_setflags(stable_t* this, char* name, int flags)
 	symbol->flags = flags;
 }
 
+int stable_hasflag(stable_t* this, char* name, int flag)
+{
+	symbol_t* symbol = stable_find(this, name);
+	if(symbol == NULL)
+	{
+		print_debug("error: symbol %s not found, segfault inc !", name);
+	}
+	return (symbol->flags & flag) != 0;
+}
 void stable_print(stable_t* this)
 {
 	symbol_t* current = this->first;
@@ -162,6 +171,12 @@ void stable_block_enter(stable_t* this)
 	// print_debug("%sEntering block...\n", tab);
 	this->current_depth++;
 	add_tab();
+}
+
+void stable_block_exit_dirtyhack(stable_t* this)
+{
+	remove_tab();
+	this->current_depth--;
 }
 
 void stable_block_exit(stable_t* this)

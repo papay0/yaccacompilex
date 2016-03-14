@@ -12,6 +12,7 @@
 %type  <type> Type
 %type  <type> PrimType
 %type  <type> VarDeclType
+%type  <type> FuncDeclType
 %type  <type> PtrType
 %type  <type> FuncType
 
@@ -42,11 +43,20 @@
 
 %%
 
-Input           :       FuncDecl Input
-                        | FuncDecl ;
+Input           :      	GlobalDecls tMinus tMinus FuncDecls;
+GlobalDecls	:	IVarDecl GlobalDecls
+			| IVarDeclAff GlobalDecls
+			| ;
 
-FuncDecl        :       Type tID tPO TypedParams tPC Body;
+FuncDecls	:	FuncDecl FuncDecls
+			| ;
 
+FuncDecl        :       FuncImplProto Body { }
+			| FuncProto tSemi;
+
+FuncImplProto	:	FuncProto { do_funcargs_declaration(); };
+
+FuncProto	:	FuncDeclType tID tPO TypedParams tPC { do_func_declaration($2, $1); }
 
 Body            :       BodyStart InstList BodyEnd
                         | BodyStart BodyEnd;
@@ -120,13 +130,14 @@ FuncCallExpr    :       tID tPO Params tPC {
 
 };
 
-TypedParams     :       TypedParam STypedParams
+TypedParams     :       STypedParams
                         | ;
 
-STypedParams    :       tComa TypedParam STypedParams
-                        | tComa TypedParam;
+STypedParams    :       TypedParam tComa STypedParams
+                        | TypedParam;
+TypedParam      :       Type tID { idbuffer_add($1); idbuffer_add($2); };
+FuncDeclType	:	Type { idbuffer_init(); };
 
-TypedParam      :       Type tID;
 
 Params          :       Expr SParams
                         | ;

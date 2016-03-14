@@ -14,7 +14,7 @@ build/lex.yy.c: src/source.lex
 	mv lex.yy.c build/lex.yy.c
 
 build/y.tab.c: src/source.yacc
-	yacc -d src/source.yacc
+	yacc -v -d src/source.yacc
 	mv y.tab.c build/y.tab.c
 	mv y.tab.h include/y.tab.h
 	echo "int getMode() { return 1; }" >> build/y.tab.c

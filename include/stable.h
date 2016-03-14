@@ -7,7 +7,7 @@ typedef struct symbol symbol_t;
 
 const int SYMBOL_INITIALIZED;
 const int SYMBOL_CONST;
-const int SYMBOL_LOCAL;
+const int SYMBOL_GLOBAL;
 const int SYMBOL_STATIC;
 
 typedef struct context {
@@ -67,6 +67,10 @@ void stable_remove(stable_t* this, int depth);
 // Retourne NULL s'il n'existe pas.
 symbol_t* stable_find(stable_t* this, char* name);
 void stable_setflags(stable_t* this, char* name, int flags);
+// Retourne vrai si le symbole donné contient le flag donné. 
+int stable_hasflag(stable_t* this, char* name, int flag);
+
+
 void stable_print(stable_t* this);
 // Signale à la table des symboles l'entrée dans un block.
 // Cela a pour effet d'augmenter la profondeur actuelle.
@@ -75,6 +79,9 @@ void stable_block_enter();
 // Cela a pour effet de décrémenter la profondeur actuelle et 
 // supprimer les variables de la profondeur précédente.
 void stable_block_exit();
+// Signale à la table des symboles la sortie d'un block, 
+// sans supprimer les variables de la profondeur précédente.
+void stable_block_exit_dirtyhack();
 
 /* ----------------------------------------------------------------------------
  * TEMPADDR

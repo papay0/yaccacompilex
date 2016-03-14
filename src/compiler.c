@@ -4,6 +4,7 @@
 #include "compiler.h"
 #include "instruction_stream.h"
 #include "warning.h"
+#include "stable.h":
 
 void ctx_init()
 {
@@ -42,6 +43,7 @@ int do_operation(expression_t e1, expression_t e2,
 	r->type = e1.type; // FIXME
 	return newaddr;
 }
+
 
 void do_if(expression_t cond){
 	istream_printf("JMF %d %d\n", cond.address, labels->index);
@@ -144,7 +146,13 @@ void do_loadsymbol( char* name, expression_t* r)
 		print_warning("symbol %s not found.\n", name);
 	}
 	int addr = tempaddr_lock(symbols);
-	istream_printf("COP %d %d\n", addr, symbol->address);
+
+	// Addressage global si symbole global ou profondeur à 0.
+	if(stable_hasflag(symbols, name, SYMBOL_GLOBAL) || symbol->depth == 0)
+		istream_printf("COP %d @%d\n", addr, symbol->address);
+	else
+		istream_printf("COP %d %d\n", addr, symbol->address);
+	
 	r->type = symbol->type;
 	r->address = addr;
 }
@@ -167,6 +175,31 @@ void do_variable_affectations(expression_t* expr)
 	}
 }
 
+void do_func_declaration(char* name, type_t* return_type) 
+{
+	int size = idbuffer_size()/2;
+	type_t** args = malloc(sizeof(type_t*)*size);
+	// Ici idbuffer contient :
+	// i : type du symbole, i+1 : nom du symbole
+	for(int i = 0; i < idbuffer_size(); i+=2)
+	{
+		args[i/2] = idbuffer_get(i);
+	}
+	type_t* functype = type_create_func(return_type, args, size);
+	stable_add(symbols, name, functype);	
+}
+
+void do_funcargs_declaration()
+{
+	// Déclaration des arguments de la fonction dans la table des symboles
+	stable_block_enter(symbols);
+	for(int i = 0; i < idbuffer_size(); i+=2)
+	{
+		stable_add(symbols, idbuffer_get(i+1), idbuffer_get(i));
+	}
+	stable_block_exit_dirtyhack(symbols);
+}
+
 void do_array_declaration(type_t* type, char* name, int size)
 {
 	type_t* arrtype = type_create_ptr(type);
@@ -180,7 +213,7 @@ void do_array_declaration(type_t* type, char* name, int size)
 type_t* do_makefunctype(type_t* return_type)
 {
   	type_t** args = (type_t**)malloc(sizeof(type_t*)*idbuffer_size());
-  	for(int i = 0; i < idbuffer_size(); i++)
+  	for(int i = 0; i < idbuffer_size(); i+=2)
 	{
     	args[idbuffer_size() - i - 1] = idbuffer_get(i);
 	}
@@ -205,6 +238,7 @@ void do_indexing(expression_t array, expression_t index, expression_t* r)
 	do_operation(array, index, &tmp, "ADD");
 	do_unary_operation(tmp, r, "COPA");
 }
+
 /* arr[i] *(arr+i) */
 /*
 int main()
