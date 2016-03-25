@@ -11,6 +11,10 @@ void ltable_add(ltable_t* this, int address) {
     this->index++;
 }
 
+int ltable_getindex(ltable_t* this) {
+    return this->index;
+}
+
 void ltable_print(ltable_t* this) {
   printf("--------------  Labels Table  --------------\n");
 	printf("| ID                 |  Address            |\n");

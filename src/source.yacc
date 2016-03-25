@@ -15,6 +15,7 @@
 %type  <type> FuncDeclType
 %type  <type> PtrType
 %type  <type> FuncType
+%type  <string> FuncProto
 
 %error-verbose
 
@@ -54,9 +55,9 @@ FuncDecls	:	FuncDecl FuncDecls
 FuncDecl        :       FuncImplProto Body { }
 			| FuncProto tSemi;
 
-FuncImplProto	:	FuncProto { do_funcargs_declaration(); };
+FuncImplProto	:	FuncProto { do_func_implementation($1); };
 
-FuncProto	:	FuncDeclType tID tPO TypedParams tPC { do_func_declaration($2, $1); }
+FuncProto	:	FuncDeclType tID tPO TypedParams tPC { do_func_declaration($2, $1); $$ = $2; }
 
 Body            :       BodyStart InstList BodyEnd
                         | BodyStart BodyEnd;

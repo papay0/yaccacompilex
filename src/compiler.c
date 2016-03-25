@@ -117,11 +117,17 @@ void do_affect(char* name, expression_t expr, int op)
 	int addr2 = symbol->address;
 	if((op & DOAFFECT_DEREFERENCE) != 0) 
 	{
-		istream_printf("COPB %d %d\n", addr2, addr);
+		if(stable_isglobal(symbols, name))
+			istream_printf("COPB @%d %d\n", addr2, addr);
+		else
+			istream_printf("COPB %d %d\n", addr2, addr);
 	} 
 	else 
 	{
-		istream_printf("COP %d %d\n", addr2, addr);
+		if(stable_isglobal(symbols, name))
+			istream_printf("COP @%d %d\n", addr2, addr);
+		else
+			istream_printf("COP %d %d\n", addr2, addr);
 	}
 
 	check_type_affect(expr.type, symbol->type);
@@ -148,7 +154,7 @@ void do_loadsymbol( char* name, expression_t* r)
 	int addr = tempaddr_lock(symbols);
 
 	// Addressage global si symbole global ou profondeur à 0.
-	if(stable_hasflag(symbols, name, SYMBOL_GLOBAL) || symbol->depth == 0)
+	if(stable_isglobal(symbols, name))
 		istream_printf("COP %d @%d\n", addr, symbol->address);
 	else
 		istream_printf("COP %d %d\n", addr, symbol->address);
@@ -187,9 +193,10 @@ void do_func_declaration(char* name, type_t* return_type)
 	}
 	type_t* functype = type_create_func(return_type, args, size);
 	stable_add(symbols, name, functype);	
+	stable_setflags(symbols, name, SYMBOL_FUNC);
 }
 
-void do_funcargs_declaration()
+void do_func_implementation(char* name)
 {
 	// Déclaration des arguments de la fonction dans la table des symboles
 	stable_block_enter(symbols);
@@ -198,6 +205,7 @@ void do_funcargs_declaration()
 		stable_add(symbols, idbuffer_get(i+1), idbuffer_get(i));
 	}
 	stable_block_exit_dirtyhack(symbols);
+	stable_setflags(symbols, name, SYMBOL_FUNC | SYMBOL_INITIALIZED);
 }
 
 void do_array_declaration(type_t* type, char* name, int size)

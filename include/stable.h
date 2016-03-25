@@ -9,6 +9,7 @@ const int SYMBOL_INITIALIZED;
 const int SYMBOL_CONST;
 const int SYMBOL_GLOBAL;
 const int SYMBOL_STATIC;
+const int SYMBOL_FUNC;
 
 typedef struct context {
 	int depth;
@@ -67,9 +68,12 @@ void stable_remove(stable_t* this, int depth);
 // Retourne NULL s'il n'existe pas.
 symbol_t* stable_find(stable_t* this, char* name);
 void stable_setflags(stable_t* this, char* name, int flags);
+// Retourne vrai si le symbole donné est global.
+int stable_isglobal(stable_t* this, char* name);
 // Retourne vrai si le symbole donné contient le flag donné. 
 int stable_hasflag(stable_t* this, char* name, int flag);
-
+// Obtient l'addresse la plus haute de la table de symboles.
+int stable_get_topaddr(stable_t* this);
 
 void stable_print(stable_t* this);
 // Signale à la table des symboles l'entrée dans un block.

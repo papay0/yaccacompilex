@@ -6,7 +6,7 @@
 #include "instruction_stream.h"
 
 
-const int SYMBOL_INITIALIZED 		= 0x01;
+const int SYMBOL_INITIALIZED 	= 0x01;
 const int SYMBOL_CONST			= 0x02;
 const int SYMBOL_GLOBAL			= 0x04;
 const int SYMBOL_STATIC			= 0x08;
@@ -82,20 +82,75 @@ void stable_free(stable_t* this)
 	free(this);
 }
 
+
+int stable_get_topaddr(stable_t* this)
+{
+	if(this->first == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		int addr = 0;
+		symbol_t* current = this->first;
+		while(current->next != NULL)
+		{
+			current = current->next;
+		}
+
+		// Après les globales : on est à 0.
+		if(stable_isglobal(this, current->name) && this->current_depth != 0)
+			return 0;
+
+		return current->address+1;
+	}
+}
+
 void stable_add(stable_t* this, char* name, type_t* type)
 {
 	symbol_t* sameSymbol = stable_find(this, name);
 	int depth = this->current_depth;
+
+	// Cas particulier : implémentation de fonction
+	if(sameSymbol != NULL)
+	{
+		if(stable_hasflag(this, name, SYMBOL_FUNC)) 
+		{
+			if(stable_hasflag(this, name, SYMBOL_INITIALIZED))
+			{
+				print_warning("Redefinition de la fonction %s\n", name);
+				return;
+			}
+		else
+			{
+				// Implémentation de la fonction => vérification du prototype
+				if(!type_equals(type, sameSymbol->type))
+				{
+					print_warning("Le prototype de la fonction %s ne correspond pas à son implémentation.\n", name);
+					print_wnotes("note: type prototype=\"");
+					type_print(sameSymbol->type);
+					print_wnotes("\", type implémentation=\"");
+					type_print(type);
+					print_wnotes("\".\n");
+				}	
+				return;
+			}
+		}
+	}
+
 	if (sameSymbol != NULL && sameSymbol->depth == depth && (strcmp(name, "<array>") != 0))
 	{
 		print_warning("Variable %s existe deja dans la même portée.\n", name);
 	}
 
+	// On calcule l'adresse du symbole
 	symbol_t* symbol = symbol_new(name, -1, depth, type);
+	symbol->address = stable_get_topaddr(this);
+
+	// On ajoute le symbole à la table.
 	if(this->first == NULL)
 	{
 		this->first = symbol;
-		symbol->address = 0;
 	}
 	else
 	{
@@ -105,11 +160,11 @@ void stable_add(stable_t* this, char* name, type_t* type)
 			current = current->next;
 		}
 		current->next = symbol;
-		symbol->address = current->address+1;
 	}
 
 	this->last = symbol;
 }
+
 
 // Retourne le symbole dont le nom est donné par name.
 // Cette fonction retourne l'addresse du dernier symbole trouvé
@@ -148,6 +203,17 @@ int stable_hasflag(stable_t* this, char* name, int flag)
 	}
 	return (symbol->flags & flag) != 0;
 }
+
+int stable_isglobal(stable_t* this, char* name)
+{
+	symbol_t* symbol = stable_find(this, name);
+	if(symbol == NULL)
+	{
+		print_debug("error: symbol %s not found, segfault inc !", name);
+	}
+	return ((symbol->flags & SYMBOL_GLOBAL) != 0) || symbol->depth == 0;
+}
+
 void stable_print(stable_t* this)
 {
 	symbol_t* current = this->first;
@@ -217,7 +283,8 @@ int tempaddr_lock(stable_t* symbols)
 			}
 			else
 			{
-				tempaddr[i].address = symbols->last->address + 1 + i;
+				int lastAddr = stable_get_topaddr(symbols);
+				tempaddr[i].address = lastAddr + i;
 			}
 			return tempaddr[i].address;
 		}

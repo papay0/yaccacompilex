@@ -2,7 +2,9 @@ Arthur :
 -
 
 Jojo :
-- Table des fonctions
+- Table des fonctions :
+    - A chaque fonction, donner comme valeur au pointeur l'@ de l'instruction
+
 - Rajouter le close du file
 - Gérer le scope
 - int a = 4;
