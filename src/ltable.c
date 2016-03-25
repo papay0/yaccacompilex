@@ -33,7 +33,6 @@ int  ltable_get_main(ltable_t* this)
 
 void ltable_set_main(ltable_t* this, int address)
 {
-    printf("setmain %d\n", address);
     this->labels[LTABLE_MAIN] = address;
 }
 
@@ -43,7 +42,6 @@ int  ltable_get_bootstrap(ltable_t* this)
 }
 void ltable_set_bootstrap(ltable_t* this, int address)
 {
-    printf("setbootstrap %d\n", address);
     this->labels[LTABLE_BOOTSTRAP] = address;
 }
 

@@ -21,6 +21,7 @@ void gtable_add(gtable_t* this, int addr, int value)
 void gtable_printtostream(gtable_t* this, ltable_t* labels)
 {
     // Commence la zone de bootstrap
+    istream_printf(".area bootstrap\n");
     ltable_set_bootstrap(labels, get_pc());
 
     for(int i = 0; i < this->index; i++) 

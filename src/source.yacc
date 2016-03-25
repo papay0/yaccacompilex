@@ -45,7 +45,9 @@
 %%
 
 Input           :      	GlobalDecls AreaSeparator FuncDecls;
+
 AreaSeparator	:	tMinus tMinus { do_end_of_declarations(); };
+
 GlobalDecls	:	IVarDecl GlobalDecls 
 			| IVarDeclAff GlobalDecls
 			| ;
@@ -53,7 +55,7 @@ GlobalDecls	:	IVarDecl GlobalDecls
 FuncDecls	:	FuncDecl FuncDecls
 			| ;
 
-FuncDecl        :       FuncImplProto Body { }
+FuncDecl        :       FuncImplProto Body { do_end_of_function();  }
 			| FuncProto tSemi;
 
 FuncImplProto	:	FuncProto { do_func_implementation($1); };
@@ -129,7 +131,7 @@ Expr            :       Affect
                         ;
 
 FuncCallExpr    :       tID tPO Params tPC {
-
+	do_func_call($1);
 };
 
 TypedParams     :       STypedParams
@@ -141,11 +143,11 @@ TypedParam      :       Type tID { idbuffer_add($1); idbuffer_add($2); };
 FuncDeclType	:	Type { idbuffer_init(); };
 
 
-Params          :       Expr SParams
-                        | ;
+Params          :       SParams
+                        | { idbuffer_init(); };
 
-SParams         :       tComa Expr SParams
-                        | tComa Expr;
+SParams         :       Expr tComa SParams { idbuffer_add(&$1); }
+                        | Expr { idbuffer_init(); idbuffer_add(&$1); };
 
 Type            :       PrimType
                         | PtrType

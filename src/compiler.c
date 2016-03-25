@@ -30,6 +30,7 @@ void ctx_init()
 	labels = ltable_new();
 	globals = gtable_new();
 	istream_open();
+	istream_printf(".area start\n");
 }
 
 void ctx_close()
@@ -39,8 +40,6 @@ void ctx_close()
 	stable_print(symbols);
 	ltable_print(labels);
 	printf("Code written to bin/yaccacompilex !\n");
-
-
 }
 
 int do_operation(expression_t e1, expression_t e2,
@@ -72,6 +71,85 @@ int do_operation(expression_t e1, expression_t e2,
 void do_end_of_declarations()
 {
 	istream_printf("JMP %d\n", ltable_get_bootstrap(labels));
+}
+
+// Rajoute le RET à la fin d'une fonction.
+void do_end_of_function()
+{
+	istream_printf("RET\n");
+}
+
+void do_func_call(char* name)
+{
+	symbol_t* symbol = stable_find(symbols, name);
+	
+	// On vérifie que ce qu'on appelle est bien une fonction.
+	if(symbol->type->kind == TYPE_KIND_FUNCTION)
+	{
+		functype_t* functype = (functype_t*)symbol->type;
+		// Vérification du nombre d'arguments.
+		if(functype->argc == idbuffer_size())
+		{
+			for(int i = 0; i < idbuffer_size(); i++)
+			{
+				expression_t* expr = (expression_t*)idbuffer_get(i);
+				type_t* type = expr->type;
+				type_t* type2 = functype->arg_types[i];
+
+				// Vérification du type des arguments
+				if(!type_equals(type, type2))
+				{
+					print_warning("call to function %s of type ", name);
+					type_print(symbol->type);
+					print_wnotes(": expected argument %d of type ", i);
+					type_print(type2);
+					print_wnotes(" but got ");
+					type_print(type);
+					print_wnotes(" instead.\n");
+				}
+			}
+		}
+		else
+		{
+			print_warning("call to function %s of type ", name);
+			type_print(symbol->type);
+			print_wnotes(": expected %d arguments, got %d\n", functype->argc, idbuffer_size());
+		}
+	}
+	else
+	{
+		print_warning("the variable %s is not a function and cannot be called.\n", name);
+		
+	}
+	
+	// *** Structure de la pile :
+	// 1. Paramètres
+	// 2. @retour
+	// 3. contexte
+	// 4. Variables locales.
+	// ***
+
+	// On récupère l'adresse la plus haute, elle servira pour l'@ de retour.
+	int top = tempaddr_lock(symbols);
+	tempaddr_unlock(symbols, top);
+
+	// Itération sur tous les paramètres
+	for(int i = 0; i < idbuffer_size(); i++)
+	{
+		expression_t* expr = (expression_t*)idbuffer_get(i);
+		// Chacune de ces variables est déjà stockée sur la pile
+		// en temps que variable temporaire.
+		
+		// Déverouillage des addresses temporaires	
+		tempaddr_unlock(symbols, expr->address);
+	}
+	// On ajoute l'@ de retour
+	istream_printf("AFC %d %d\n", top, get_pc()+2);
+
+
+	// L'instruction call va sauvegarder le contexte.
+	int funcaddr = symbol->address;
+	istream_printf("CALL @%d\n", funcaddr);
 }
 
 void do_if(expression_t cond){
@@ -231,6 +309,7 @@ void do_func_declaration(char* name, type_t* return_type)
 	type_t* functype = type_create_func(return_type, args, size);
 	stable_add(symbols, name, functype);	
 	stable_setflags(symbols, name, SYMBOL_FUNC);
+	istream_printf(".function %s\n", name);
 }
 
 void do_func_implementation(char* name)

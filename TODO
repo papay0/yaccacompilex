@@ -2,10 +2,7 @@ Arthur :
 -
 
 Jojo :
-- Table des fonctions :
-    - A chaque fonction, donner comme valeur au pointeur l'@ de l'instruction
 - Appel de fonctions
-- Liens entre les parties de code.
 
 - Rajouter le close du file
 - Gérer le scope

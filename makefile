@@ -6,6 +6,12 @@ LDFLAGS=-g -ll
 
 all: bin/parser
 
+tests: bin/parser
+	bin/parser < test/table.c && cat bin/yaccacompilex
+
+dtests: bin/parser
+	gdb bin/parser
+
 bin/parser: build/y.tab.o build/lex.yy.o build/compiler.o build/gtable.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o
 	$(LD) build/y.tab.o build/lex.yy.o build/compiler.o build/gtable.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o $(LDFLAGS) -o bin/parser
 
