@@ -38,6 +38,7 @@ void istream_printf(char* format, ... ) {
   }
 }
 
+
 void istream_close() {
   fclose(fp);
 }

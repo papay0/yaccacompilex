@@ -6,19 +6,30 @@
 #include "warning.h"
 #include "stable.h":
 
+
+/* --------------------------
+ *  STRUCTURE DU CODE GENERE
+ * --------------------------
+ * 1.   INIT. GLOBALES
+ * 2.   CODE FONCTIONS
+ * 3.   INIT. FUNCPTRS
+ */
 void ctx_init()
 {
 	ctx.depth = 0;
 	tempaddr_init();
 	symbols = stable_new();
 	labels = ltable_new();
+	globals = gtable_new();
 	istream_open();
 }
 
 void ctx_close()
 {
+	gtable_printtostream(globals);
 	istream_close();
 }
+
 int do_operation(expression_t e1, expression_t e2,
 	expression_t* r, char* opname)
 {
@@ -118,16 +129,24 @@ void do_affect(char* name, expression_t expr, int op)
 	if((op & DOAFFECT_DEREFERENCE) != 0) 
 	{
 		if(stable_isglobal(symbols, name))
+		{
 			istream_printf("COPB @%d %d\n", addr2, addr);
+		}
 		else
+		{
 			istream_printf("COPB %d %d\n", addr2, addr);
+		}
 	} 
 	else 
 	{
 		if(stable_isglobal(symbols, name))
+		{
 			istream_printf("COP @%d %d\n", addr2, addr);
+		}
 		else
+		{
 			istream_printf("COP %d %d\n", addr2, addr);
+		}
 	}
 
 	check_type_affect(expr.type, symbol->type);
@@ -206,6 +225,10 @@ void do_func_implementation(char* name)
 	}
 	stable_block_exit_dirtyhack(symbols);
 	stable_setflags(symbols, name, SYMBOL_FUNC | SYMBOL_INITIALIZED);
+
+	// Affectation du pointeur de la fonction au PC
+	symbol_t* symbol = stable_find(symbols, name);
+	gtable_add(globals, symbol->address, get_pc()); 
 }
 
 void do_array_declaration(type_t* type, char* name, int size)

@@ -6,8 +6,8 @@ LDFLAGS=-g -ll
 
 all: bin/parser
 
-bin/parser: build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o
-	$(LD) build/y.tab.o build/lex.yy.o build/compiler.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o $(LDFLAGS) -o bin/parser
+bin/parser: build/y.tab.o build/lex.yy.o build/compiler.o build/gtable.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o
+	$(LD) build/y.tab.o build/lex.yy.o build/compiler.o build/gtable.o build/stable.o build/idbuffer.o build/types.o build/warning.o build/instruction_stream.o build/ltable.o $(LDFLAGS) -o bin/parser
 
 build/lex.yy.c: src/source.lex
 	flex src/source.lex
@@ -30,6 +30,9 @@ build/compiler.o: src/compiler.c include/compiler.h
 
 build/stable.o: src/stable.c include/stable.h
 	$(CC) src/stable.c $(CCFLAGS) $(INCLUDE) -c -o build/stable.o
+
+build/gtable.o: src/gtable.c include/gtable.h
+	$(CC) src/gtable.c $(CCFLAGS) $(INCLUDE) -c -o build/gtable.o
 
 build/idbuffer.o: src/idbuffer.c include/idbuffer.h
 	$(CC) src/idbuffer.c $(CCFLAGS) $(INCLUDE) -c -o build/idbuffer.o

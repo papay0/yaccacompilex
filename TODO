@@ -4,9 +4,17 @@ Arthur :
 Jojo :
 - Table des fonctions :
     - A chaque fonction, donner comme valeur au pointeur l'@ de l'instruction
+- Appel de fonctions
+- Liens entre les parties de code.
 
 - Rajouter le close du file
 - Gérer le scope
 - int a = 4;
   AFC 0 4
   COP 0 0 // enlever le COP comme celui la parce que tu connais pas bien le C !!
+
+
+SOUTENANCE :
+	- un rapport avec ce qu'on a dev, comment on a fait, points difficiles / résolus...
+	  écrit comme un ingé dans une entreprise
+	- code source à rendre

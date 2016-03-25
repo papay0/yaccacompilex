@@ -3,6 +3,7 @@
 
 #include "stable.h"
 #include "ltable.h"
+#include "gtable.h"
 #include "idbuffer.h"
 #include "types.h"
 
@@ -40,5 +41,6 @@ type_t* do_makefunctype(type_t* return_type);
 context_t ctx;
 stable_t* symbols;
 ltable_t* labels;
+gtable_t* globals;
 
 #endif
