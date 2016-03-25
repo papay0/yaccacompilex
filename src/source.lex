@@ -7,6 +7,8 @@ int getMode();
 #define p(x, s) if(getMode() == 0) printf(x, s)
 
 %}
+tComment 	"//".*
+tCommentS	"/*"
 tNumber 	(\+|\-)?([0-9]+)(e(\+|\-)[0-9]+)*
 tID 		([a-zA-Z_]+[0-9a-zA-Z_]*)
 tINT 		"int"
@@ -38,6 +40,8 @@ tNotEquals 	"!="
 %%
 
 
+{tCommentS}     { consume_comment(); }
+{tComment}		{  }
 {tINT} 			{ p("INT{%s} ", yytext); 	return tINT; };
 {tCHAR}			{ p("CHAR{%s} ", yytext); 	return tCHAR; };
 {tPrint} 		{ p("Print{%s} ", yytext); 	return tPrint; };
@@ -79,3 +83,20 @@ tNotEquals 	"!="
 
 . ;
 %%
+
+void consume_comment()
+{
+    int c, prev;
+
+    while ((c = input()) != 0)
+	{
+		// fin du commentaire
+		if(c == '/' && prev == '*') return;
+		// incrémentation du numéro de ligne si on le mange.
+		if (c == '\n') yylineno++;
+		// fin du fichier => le commentaire n'est pas fermé.
+		if (c == 0) break;
+		prev = c;
+    }
+    yyerror("erreur: commentaire non fini.");
+}
