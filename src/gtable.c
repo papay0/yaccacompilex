@@ -18,11 +18,17 @@ void gtable_add(gtable_t* this, int addr, int value)
     this->index++;
 }
 
-void gtable_printtostream(gtable_t* this)
+void gtable_printtostream(gtable_t* this, ltable_t* labels)
 {
+    // Commence la zone de bootstrap
+    ltable_set_bootstrap(labels, get_pc());
+
     for(int i = 0; i < this->index; i++) 
     {
         gtable_entry_t* e= &this->entries[i];
         istream_printf("AFC @%d %d\n", e->addr, e->value);
     }
+
+    // JUMP au bootstrap
+    istream_printf("JMP %d\n", ltable_get_main(labels));
 }

@@ -1,6 +1,7 @@
 #ifndef GTABLE_H
 #define GTABLE_H
 
+#include "ltable.h"
 
 #define GTABLE_SIZE 256
 
@@ -23,6 +24,6 @@ gtable_t* gtable_new();
 // value : valeur de la globale
 void gtable_add(gtable_t* this, int addr, int value);
 // Ajoute le code de la table des fonctions dans le flux d'instructions.
-void gtable_printtostream(gtable_t* this);
+void gtable_printtostream(gtable_t* this, ltable_t* labels);
 
 #endif

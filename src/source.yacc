@@ -44,8 +44,9 @@
 
 %%
 
-Input           :      	GlobalDecls tMinus tMinus FuncDecls;
-GlobalDecls	:	IVarDecl GlobalDecls
+Input           :      	GlobalDecls AreaSeparator FuncDecls;
+AreaSeparator	:	tMinus tMinus { do_end_of_declarations(); };
+GlobalDecls	:	IVarDecl GlobalDecls 
 			| IVarDeclAff GlobalDecls
 			| ;
 
@@ -178,14 +179,11 @@ int main(int argc, char** argv)
 		while(1) { yylex(); }
 
 	if(getMode() == 1)
-		{
-			ctx_init();
-			yyparse();
-			stable_print(symbols);
-			ltable_print(labels);
-			printf("I write in the file\n");
-			ctx_close();
-		}
+	{
+		ctx_init();
+		yyparse();
+		ctx_close();
+	}
 
 	return 0;
 }

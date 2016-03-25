@@ -11,8 +11,16 @@
  *  STRUCTURE DU CODE GENERE
  * --------------------------
  * 1.   INIT. GLOBALES
+		xx: AFC ...
+		xx. JMP bootstrap
  * 2.   CODE FONCTIONS
+		xx: int truc() { }
+		xx: .main
+		xx: int main() { }
  * 3.   INIT. FUNCPTRS
+		xx: .bootstrap
+		xx: COP ...
+		xx: JMP main
  */
 void ctx_init()
 {
@@ -26,8 +34,13 @@ void ctx_init()
 
 void ctx_close()
 {
-	gtable_printtostream(globals);
+	gtable_printtostream(globals, labels);
 	istream_close();
+	stable_print(symbols);
+	ltable_print(labels);
+	printf("Code written to bin/yaccacompilex !\n");
+
+
 }
 
 int do_operation(expression_t e1, expression_t e2,
@@ -55,6 +68,11 @@ int do_operation(expression_t e1, expression_t e2,
 	return newaddr;
 }
 
+// A la fin des déclarations, effectue le saut vers la section "bootstrap".
+void do_end_of_declarations()
+{
+	istream_printf("JMP %d\n", ltable_get_bootstrap(labels));
+}
 
 void do_if(expression_t cond){
 	istream_printf("JMF %d %d\n", cond.address, labels->index);
@@ -229,6 +247,13 @@ void do_func_implementation(char* name)
 	// Affectation du pointeur de la fonction au PC
 	symbol_t* symbol = stable_find(symbols, name);
 	gtable_add(globals, symbol->address, get_pc()); 
+
+	// S'il s'agit de la fonction main
+	// On ajoute le label main à la table des labels.
+	if(strcmp(name, "main") == 0)
+	{
+		ltable_set_main(labels, get_pc());
+	}
 }
 
 void do_array_declaration(type_t* type, char* name, int size)
