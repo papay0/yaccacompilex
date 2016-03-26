@@ -6,11 +6,14 @@
 
 #define DEBUG     1
 
+// Numéro de ligne de lex
+extern int yylineno;
+
 void print_debug(const char* format, ...) {
   if (DEBUG)
   {
     va_list args;
-    fprintf(stdout, "\033[1;31m[Debug] "); 
+    fprintf(stdout, "\033[1;32m[Debug] "); 
 	va_start(args, format);
     vfprintf(stdout, format, args);
     va_end(args);
@@ -22,7 +25,7 @@ void print_warning( const char* format, ... ) {
   if (DEBUG)
   {
     va_list args;
-    fprintf(stdout, "\033[1;32mwarning: " );
+    fprintf(stdout, "\033[1;31mwarning line %d: ", yylineno );
     va_start( args, format );
     vfprintf(stdout, format, args );
     va_end( args );
@@ -34,7 +37,7 @@ void print_wnotes(const char* format, ... ) {
   if (DEBUG)
   {
     va_list args;
-    fprintf(stdout, "\033[1;32m\t" );
+    fprintf(stdout, "\033[1;31m\t" );
     va_start( args, format );
     vfprintf(stdout, format, args );
     va_end( args );

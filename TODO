@@ -2,13 +2,8 @@ Arthur :
 -
 
 Jojo :
-- Appel de fonctions
-
-- Rajouter le close du file
-- Gérer le scope
-- int a = 4;
-  AFC 0 4
-  COP 0 0 // enlever le COP comme celui la parce que tu connais pas bien le C !!
+- GESTION DES ERREURS AVANCEE 
+- Cast
 
 
 SOUTENANCE :

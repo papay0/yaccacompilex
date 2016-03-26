@@ -66,7 +66,7 @@ Body            :       BodyStart InstList BodyEnd
                         | BodyStart BodyEnd;
 
 BodyStart       :       tAO { stable_block_enter(symbols); };
-BodyEnd         :       tAC { stable_block_exit(symbols); stable_print(symbols); };
+BodyEnd         :       tAC { stable_block_exit(symbols); };
 
 InstList        :       Inst InstList
                         | Inst;
@@ -78,7 +78,8 @@ Inst            :       IVarDecl
                         | If
                         | While
                         | Return
-                        | Print;
+                        | Print
+			| error tSemi { handle_syntax_error(); yyerrok; };
 
 IFuncCall       :       FuncCallExpr tSemi;
 
@@ -125,6 +126,7 @@ Expr            :       Affect
                         | Expr tMinus Expr      { do_operation($1, $3, &$$, "SUB"); }
                         | Expr tMult Expr       { do_operation($1, $3, &$$, "MUL"); }
                         | Expr tDiv Expr        { do_operation($1, $3, &$$, "DIV"); }
+			| tPO Type tPC Expr	{ $4.type = $2; $$ = $4; }
                         | FuncCallExpr
                         | tNumber { do_loadliteral($1, &$$); }
                         | tID { do_loadsymbol($1, &$$); }
@@ -171,7 +173,7 @@ PrimType        :       tINT    { $$ = type_create_primitive("int"); }
 
 %%
 
-void yyerror(char const * errorText) { }
+void yyerror(char const * errorText) { print_warning("%s\n", errorText); }
 int getMode();
 
 int main(int argc, char** argv)

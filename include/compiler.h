@@ -13,6 +13,11 @@ typedef struct expression
 	type_t* type;
 } expression_t;
 
+typedef struct context {
+	int verbose;
+} context_t;
+
+
 void ctx_init();
 void ctx_close();
 // Génère le code l'operation donnée par opname ("ADD", "MULT", etc...) sur les expressions

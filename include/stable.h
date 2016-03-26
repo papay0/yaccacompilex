@@ -11,10 +11,6 @@ const int SYMBOL_GLOBAL;
 const int SYMBOL_STATIC;
 const int SYMBOL_FUNC;
 
-typedef struct context {
-	int depth;
-} context_t;
-
 // Represente un symbole dans la table de symboles.
 typedef struct symbol {
 	symbol_t* next;
@@ -58,7 +54,8 @@ stable_t* stable_new();
 // Libère la mémoire allouée par la table de symbole.
 void stable_free(stable_t* this);
 // Ajoute un symbole dans la table de symboles donnee.
-void stable_add(stable_t* this, char* name, type_t* type);
+// Retourne l'adresse du symbole ajouté.
+int stable_add(stable_t* this, char* name, type_t* type);
 // Supprime tous les symboles à une profondeur donnée.
 void stable_remove(stable_t* this, int depth);
 

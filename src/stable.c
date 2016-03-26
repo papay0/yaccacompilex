@@ -106,7 +106,7 @@ int stable_get_topaddr(stable_t* this)
 	}
 }
 
-void stable_add(stable_t* this, char* name, type_t* type)
+int stable_add(stable_t* this, char* name, type_t* type)
 {
 	symbol_t* sameSymbol = stable_find(this, name);
 	int depth = this->current_depth;
@@ -119,9 +119,9 @@ void stable_add(stable_t* this, char* name, type_t* type)
 			if(stable_hasflag(this, name, SYMBOL_INITIALIZED))
 			{
 				print_warning("Redefinition de la fonction %s\n", name);
-				return;
+				return sameSymbol->address;
 			}
-		else
+			else
 			{
 				// Implémentation de la fonction => vérification du prototype
 				if(!type_equals(type, sameSymbol->type))
@@ -133,7 +133,7 @@ void stable_add(stable_t* this, char* name, type_t* type)
 					type_print(type);
 					print_wnotes("\".\n");
 				}	
-				return;
+				return sameSymbol->address;
 			}
 		}
 	}
@@ -163,6 +163,7 @@ void stable_add(stable_t* this, char* name, type_t* type)
 	}
 
 	this->last = symbol;
+	return symbol->address;
 }
 
 
@@ -250,11 +251,13 @@ void stable_block_exit(stable_t* this)
 	remove_tab();
 	char* tab = get_tab();
 	// print_debug("%sExiting block... \n", tab);
-	if(this->current_depth == 0)
-	{
-		print_debug("%sSymbol table before exit : \n", tab);
-		stable_print(this);
-	}
+	/*
+		if(this->current_depth == 0)
+		{
+			print_debug("%sSymbol table before exit : \n", tab);
+			stable_print(this);
+		}
+	*/
 	stable_remove(this, this->current_depth);
 	this->current_depth--;
 }

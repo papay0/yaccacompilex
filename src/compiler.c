@@ -7,6 +7,7 @@
 #include "stable.h":
 
 
+
 /* --------------------------
  *  STRUCTURE DU CODE GENERE
  * --------------------------
@@ -22,9 +23,27 @@
 		xx: COP ...
 		xx: JMP main
  */
+
+// Retourne vrai si le symbole donné est null.
+// Si c'est le cas, effectue sa déclaration implicite.
+int check_null(symbol_t** symbol, char* name)
+{
+	if(*symbol == NULL)
+	{
+		print_warning("symbol %s has not been declared.\n", name);
+		print_wnotes("note: implicit declaration of symbol %s, type defaults to int.\n", name);
+		// Déclaration implicite du symbole.
+		type_t* type = type_create_primitive("int");
+		int addr = stable_add(symbols, name, type);
+		*symbol = stable_find(symbols, name);
+		return 1;
+	}
+	return 0;
+}
+
 void ctx_init()
 {
-	ctx.depth = 0;
+	ctx.verbose = 0;
 	tempaddr_init();
 	symbols = stable_new();
 	labels = ltable_new();
@@ -37,8 +56,11 @@ void ctx_close()
 {
 	gtable_printtostream(globals, labels);
 	istream_close();
-	stable_print(symbols);
-	ltable_print(labels);
+	if(ctx.verbose)
+	{
+		stable_print(symbols);
+		ltable_print(labels);
+	}
 	printf("Code written to bin/yaccacompilex !\n");
 }
 
@@ -53,7 +75,6 @@ int do_operation(expression_t e1, expression_t e2,
 	istream_printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
 	r->address = newaddr;
 
-	// TODO : type check
 	if(!type_compatible(e1.type, e2.type, type_getoptype(opname)))
 	{
 		print_warning("incompatible-pointer-types\n");
@@ -63,8 +84,13 @@ int do_operation(expression_t e1, expression_t e2,
 		type_print(e2.type);
 		print_wnotes(".\n");
 	}
-	r->type = e1.type; // FIXME
+	r->type = e1.type; // FIXME le type peut dépendre de l'opération
 	return newaddr;
+}
+
+void handle_syntax_error()
+{
+	// print_warning("syntax error before token ';'. Instruction discarded.");
 }
 
 // A la fin des déclarations, effectue le saut vers la section "bootstrap".
@@ -165,7 +191,10 @@ void do_body(){
 			}
 	}
 	labels->labels[last_index] = get_pc();
-	ltable_print(labels);
+
+	// Affiche la table des labels en mode verbose
+	if(ctx.verbose)
+		ltable_print(labels);
 }
 
 
@@ -217,9 +246,8 @@ void check_type_affect(type_t* exprtype, type_t* dest)
 void do_affect(char* name, expression_t expr, int op)
 {
 	symbol_t* symbol = stable_find(symbols, name);
-	if(symbol == NULL) 	{
-		print_warning("symbol %s not found.", name);
-	}
+	check_null(&symbol, name);
+ 	
 	int addr = expr.address;
 	int addr2 = symbol->address;
 	if((op & DOAFFECT_DEREFERENCE) != 0) 
@@ -263,9 +291,8 @@ void do_loadliteral(int literalValue, expression_t* r)
 void do_loadsymbol( char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
-	if(symbol == NULL) {
-		print_warning("symbol %s not found.\n", name);
-	}
+	check_null(&symbol, name);
+
 	int addr = tempaddr_lock(symbols);
 
 	// Addressage global si symbole global ou profondeur à 0.
@@ -359,9 +386,8 @@ type_t* do_makefunctype(type_t* return_type)
 void do_reference(char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
-	if(symbol == NULL) {
-		print_warning("symbol %s not found.", name);
-	}
+	check_null(&symbol, name);
+
 	r->type = type_create_ptr(symbol->type);
 	r->address = tempaddr_lock(symbols);
 	istream_printf("AFC %d %d\n", r->address, symbol->address);

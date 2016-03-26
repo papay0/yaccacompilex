@@ -9,7 +9,7 @@ int getMode();
 %}
 tComment 	"//".*
 tCommentS	"/*"
-tNumber 	(\+|\-)?([0-9]+)(e(\+|\-)[0-9]+)*
+tNumber 	(\-)?([0-9]+)(e(\+|\-)[0-9]+)*
 tID 		([a-zA-Z_]+[0-9a-zA-Z_]*)
 tINT 		"int"
 tCHAR		"char"
@@ -80,7 +80,7 @@ tNotEquals 	"!="
 {tAnd}			{ p("And{%s} ", yytext);	return tAnd;};
 {tAmpersand}	{ p("Ampersand{%s}", yytext); return tAmpersand; };
 {tOr}			{ p("Or{%s} ", yytext);		return tOr;};
-
+\n 				{ yylineno++; }
 . ;
 %%
 
