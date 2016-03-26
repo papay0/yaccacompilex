@@ -55,7 +55,7 @@ stable_t* stable_new();
 void stable_free(stable_t* this);
 // Ajoute un symbole dans la table de symboles donnee.
 // Retourne l'adresse du symbole ajouté.
-int stable_add(stable_t* this, char* name, type_t* type);
+symbol_t* stable_add(stable_t* this, char* name, type_t* type);
 // Supprime tous les symboles à une profondeur donnée.
 void stable_remove(stable_t* this, int depth);
 

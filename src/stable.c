@@ -106,7 +106,7 @@ int stable_get_topaddr(stable_t* this)
 	}
 }
 
-int stable_add(stable_t* this, char* name, type_t* type)
+symbol_t* stable_add(stable_t* this, char* name, type_t* type)
 {
 	symbol_t* sameSymbol = stable_find(this, name);
 	int depth = this->current_depth;
@@ -119,7 +119,7 @@ int stable_add(stable_t* this, char* name, type_t* type)
 			if(stable_hasflag(this, name, SYMBOL_INITIALIZED))
 			{
 				print_warning("Redefinition de la fonction %s\n", name);
-				return sameSymbol->address;
+				return sameSymbol;
 			}
 			else
 			{
@@ -133,7 +133,7 @@ int stable_add(stable_t* this, char* name, type_t* type)
 					type_print(type);
 					print_wnotes("\".\n");
 				}	
-				return sameSymbol->address;
+				return sameSymbol;
 			}
 		}
 	}
@@ -163,7 +163,7 @@ int stable_add(stable_t* this, char* name, type_t* type)
 	}
 
 	this->last = symbol;
-	return symbol->address;
+	return symbol;
 }
 
 

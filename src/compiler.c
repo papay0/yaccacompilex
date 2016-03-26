@@ -99,20 +99,34 @@ void do_end_of_declarations()
 	istream_printf("JMP %d\n", ltable_get_bootstrap(labels));
 }
 
+void do_return(expression_t retval)
+{
+	// On met la valeur tout en haut de la pile.
+	int addr = tempaddr_lock(symbols);
+	tempaddr_unlock(symbols, addr);
+	istream_printf("COP %d %d\n", addr, retval.address);
+	// On appelle RET
+	istream_printf("RET\n");
+}
+
+void do_print(expression_t val)
+{
+	istream_printf("PRI %d\n", val.address);
+}
 // Rajoute le RET à la fin d'une fonction.
 void do_end_of_function()
 {
 	istream_printf("RET\n");
 }
 
-void do_func_call(char* name)
+void do_func_call(char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
-	
+	check_null(&symbol, name);
+	functype_t* functype = (functype_t*)symbol->type;
 	// On vérifie que ce qu'on appelle est bien une fonction.
 	if(symbol->type->kind == TYPE_KIND_FUNCTION)
 	{
-		functype_t* functype = (functype_t*)symbol->type;
 		// Vérification du nombre d'arguments.
 		if(functype->argc == idbuffer_size())
 		{
@@ -150,14 +164,16 @@ void do_func_call(char* name)
 	
 	// *** Structure de la pile :
 	// 1. Paramètres
-	// 2. @retour
-	// 3. contexte
-	// 4. Variables locales.
+	// 2. @retour				<- ctx - 2
+	// 3. contexte				<- ctx - 1
+	// 4. Variables locales.	
+	//		var1				<- ctx
+	//		varn				<- sp
 	// ***
 
 	// On récupère l'adresse la plus haute, elle servira pour l'@ de retour.
+	// Ainsi que pour la valeur retournée
 	int top = tempaddr_lock(symbols);
-	tempaddr_unlock(symbols, top);
 
 	// Itération sur tous les paramètres
 	for(int i = 0; i < idbuffer_size(); i++)
@@ -174,8 +190,16 @@ void do_func_call(char* name)
 
 
 	// L'instruction call va sauvegarder le contexte.
+	// L'instruction RET va écrire à l'adresse 'top' la valeur de retour.
 	int funcaddr = symbol->address;
 	istream_printf("CALL @%d\n", funcaddr);
+
+	// Retour de la fonction
+	r->address = top;
+	if(symbol->type->kind == TYPE_KIND_FUNCTION)
+		r->type = functype->return_type;
+	else
+		r->type = symbol->type; // hacky
 }
 
 void do_if(expression_t cond){
@@ -345,11 +369,21 @@ void do_func_implementation(char* name)
 	stable_block_enter(symbols);
 	for(int i = 0; i < idbuffer_size(); i+=2)
 	{
-		stable_add(symbols, idbuffer_get(i+1), idbuffer_get(i));
+		symbol_t* s = stable_add(symbols, idbuffer_get(i+1), idbuffer_get(i));
+		// -2 : @retour, contexte
+		// idbuffer_size() + i / 2 => dans l'ordre d'ajout
+		s->address = -2 - (idbuffer_size() - i)/2 + 1;
 	}
+	// Ajout du contexte + @retour
+	symbol_t* ra = stable_add(symbols, "<@>", type_create_primitive("int"));
+	symbol_t* ctx = stable_add(symbols, "<ctx>", type_create_primitive("int"));	
+	ra->address = -1;
+	ctx->address = 0;
+
 	stable_block_exit_dirtyhack(symbols);
 	stable_setflags(symbols, name, SYMBOL_FUNC | SYMBOL_INITIALIZED);
 
+	stable_print(symbols);
 	// Affectation du pointeur de la fonction au PC
 	symbol_t* symbol = stable_find(symbols, name);
 	gtable_add(globals, symbol->address, get_pc()); 

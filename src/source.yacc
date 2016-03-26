@@ -81,7 +81,7 @@ Inst            :       IVarDecl
                         | Print
 			| error tSemi { handle_syntax_error(); yyerrok; };
 
-IFuncCall       :       FuncCallExpr tSemi;
+IFuncCall       :       FuncCallExpr tSemi { tempaddr_unlock(symbols, $1.address); };
 
 IVarDeclAff     :       VarDecl tAffect Expr tSemi { do_variable_affectations(&$3); };
 IVarDecl        :       VarDecl tSemi;
@@ -108,8 +108,8 @@ If              :       tIf tPO Cond tPC Body { do_body(); }
                         | tIf tPO Cond tPC Body Else;
 Else            :       tElse Body;
 While           :       tWhile tPO Cond tPC Body;
-Return          :       tReturn Expr tSemi;
-Print           :       tPrint tPO Expr tPC tSemi;
+Return          :       tReturn Expr tSemi { do_return($2); };
+Print           :       tPrint tPO Expr tPC tSemi { do_print($3); };
 Affect          :       tID tAffect Expr { do_affect($1, $3, DOAFFECT_NONE); $$.address = $3.address; }
 			| tMult tID tAffect Expr { do_affect($2, $4, DOAFFECT_DEREFERENCE); $$.address = $4.address; };
 
@@ -127,13 +127,13 @@ Expr            :       Affect
                         | Expr tMult Expr       { do_operation($1, $3, &$$, "MUL"); }
                         | Expr tDiv Expr        { do_operation($1, $3, &$$, "DIV"); }
 			| tPO Type tPC Expr	{ $4.type = $2; $$ = $4; }
-                        | FuncCallExpr
+                        | FuncCallExpr 		{ $$ = $1; }
                         | tNumber { do_loadliteral($1, &$$); }
                         | tID { do_loadsymbol($1, &$$); }
                         ;
 
 FuncCallExpr    :       tID tPO Params tPC {
-	do_func_call($1);
+	do_func_call($1, &$$);
 };
 
 TypedParams     :       STypedParams
