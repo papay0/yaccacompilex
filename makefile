@@ -6,8 +6,9 @@ LDFLAGS=-g -ll
 
 all: bin/parser
 
-tests: bin/parser
-	bin/parser < test/table.c && cat bin/yaccacompilex
+tests: bin/parser 
+	bin/parser < test/table.c 
+	pr -m -t bin/yaccacompilex test/table.c
 
 dtests: bin/parser
 	gdb bin/parser
