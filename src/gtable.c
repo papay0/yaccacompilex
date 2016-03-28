@@ -31,5 +31,5 @@ void gtable_printtostream(gtable_t* this, ltable_t* labels)
     }
 
     // JUMP au bootstrap
-    istream_printf("JMP %d\n", ltable_get_main(labels));
+    istream_printf("CALL @%d\n", labels->labels[ltable_get_main(labels)]);
 }

@@ -90,4 +90,6 @@ void stable_block_exit_dirtyhack();
 void tempaddr_init();
 int tempaddr_lock(stable_t* symbols);
 void tempaddr_unlock(stable_t* symbols, int addr);
+void tempaddr_unlock_all(stable_t* symbols);
+
 #endif

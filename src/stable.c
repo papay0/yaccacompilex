@@ -258,6 +258,7 @@ void stable_block_exit(stable_t* this)
 			stable_print(this);
 		}
 	*/
+	tempaddr_unlock_all(this);
 	stable_remove(this, this->current_depth);
 	this->current_depth--;
 }
@@ -273,7 +274,6 @@ void tempaddr_init()
 		tempaddr[i].id = i;
 	}
 }
-
 int tempaddr_lock(stable_t* symbols)
 {
 	for(int i = 0; i < TEMPADDR_COUNT; i++)
@@ -290,7 +290,12 @@ int tempaddr_lock(stable_t* symbols)
 				tempaddr[i].address = lastAddr + i;
 			}
 			return tempaddr[i].address;
+		} 
+		else 
+		{
+			// print_debug("line %d: addr %d (%d) still locked\n", yylineno, i, tempaddr[i].address);
 		}
+
 	}
 	print_debug("lock_tempaddr: not enough addresses\n");
 	return -1;
@@ -298,6 +303,7 @@ int tempaddr_lock(stable_t* symbols)
 
 void tempaddr_unlock(stable_t* symbols, int addr)
 {
+	// print_debug("line %d: unlock addr %d\n", yylineno, addr);
 	for(int i = 0; i < TEMPADDR_COUNT; i++)
 	{
 		if(tempaddr[i].address == addr) {
@@ -305,9 +311,15 @@ void tempaddr_unlock(stable_t* symbols, int addr)
 			return;
 		}
 	}
-	print_debug("unlock_tempaddr: no var to unlock");
+	// print_debug("unlock_tempaddr: no var to unlock\n");
 }
-
+void tempaddr_unlock_all(stable_t* symbols)
+{
+	for(int i = 0; i < TEMPADDR_COUNT; i++)
+	{
+		tempaddr[i].locked = 0;
+	}
+}
 int test_stable()
 {
 	type_t* type = type_create_primitive("int");

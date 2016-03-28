@@ -10,13 +10,30 @@ int facto(int n, int n2)
     return n+1;
 }
 
+int glglgl(int g) { 
+    int f;
+    int h;
+    int i;
+}
 int main()
 {
+    int c = 50;
+    int d = 60;
+    int kode = 70;
+    int* e = &c;
     a = facto(5, 3);
-    int b = 50;
-    print(a);
-    print(b);
+    int* b = &a;
+
+    print(b, b);
+    print(vb, *b);
+    print(a, a);
+    print(e, e);
+    print(ve, *e);
+    print(ac, &c);
+    print(c, c);
+    print(a, a);
 }
+
 /*
 int ha(int arg0, int arg1)
 { 

@@ -101,18 +101,26 @@ void do_end_of_declarations()
 
 void do_return(expression_t retval)
 {
-	// On met la valeur tout en haut de la pile.
+	// On met la valeur au dessus du contexte
 	int addr = tempaddr_lock(symbols);
 	tempaddr_unlock(symbols, addr);
-	istream_printf("COP %d %d\n", addr, retval.address);
+	istream_printf("COP 1 %d\n", retval.address);
 	// On appelle RET
 	istream_printf("RET\n");
 }
 
 void do_print(expression_t val)
 {
+	tempaddr_unlock(symbols, val.address);
 	istream_printf("PRI %d\n", val.address);
 }
+
+void do_dprint(char* name, expression_t val)
+{
+	tempaddr_unlock(symbols, val.address);
+	istream_printf("PRID %d %s\n", val.address, name);
+}
+
 // Rajoute le RET à la fin d'une fonction.
 void do_end_of_function()
 {
@@ -186,6 +194,8 @@ void do_func_call(char* name, expression_t* r)
 		tempaddr_unlock(symbols, expr->address);
 	}
 	// On ajoute l'@ de retour
+	istream_printf(".args %d\n", idbuffer_size());
+	istream_printf(".ra\n");
 	istream_printf("AFC %d %d\n", top, get_pc()+2);
 
 
@@ -195,7 +205,11 @@ void do_func_call(char* name, expression_t* r)
 	istream_printf("CALL @%d\n", funcaddr);
 
 	// Retour de la fonction
-	r->address = top;
+	// La valeur de retour de la fonction est positionnée à CTX+1
+	// top   = @ de l'@retour
+	// top+1 = @ du ctx
+	// top+2 = @ du ctx+1
+	r->address = top + 2;
 	if(symbol->type->kind == TYPE_KIND_FUNCTION)
 		r->type = functype->return_type;
 	else
@@ -335,6 +349,7 @@ void do_variable_declarations(type_t* type)
 	for(int i = 0; i < idbuffer_size(); i++)
 	{
 		stable_add(symbols, (char*)idbuffer_get(i), type);
+		istream_printf(".local %s\n", idbuffer_get(i));
 	}
 }
 
@@ -392,7 +407,9 @@ void do_func_implementation(char* name)
 	// On ajoute le label main à la table des labels.
 	if(strcmp(name, "main") == 0)
 	{
-		ltable_set_main(labels, get_pc());
+		// Cas particulier : on ajoute l'@ du symbole 
+		// pour le call !
+		ltable_set_main(labels, symbol->address);
 	}
 }
 
@@ -424,7 +441,12 @@ void do_reference(char* name, expression_t* r)
 
 	r->type = type_create_ptr(symbol->type);
 	r->address = tempaddr_lock(symbols);
-	istream_printf("AFC %d %d\n", r->address, symbol->address);
+
+	if(stable_isglobal(symbols, name))
+		istream_printf("PTR %d %d\n", r->address, symbol->address);
+	else
+		istream_printf("PTR %d @%d\n", r->address, symbol->address);
+
 }
 
 void do_indexing(expression_t array, expression_t index, expression_t* r)

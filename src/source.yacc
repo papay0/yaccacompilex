@@ -109,7 +109,8 @@ If              :       tIf tPO Cond tPC Body { do_body(); }
 Else            :       tElse Body;
 While           :       tWhile tPO Cond tPC Body;
 Return          :       tReturn Expr tSemi { do_return($2); };
-Print           :       tPrint tPO Expr tPC tSemi { do_print($3); };
+Print           :       tPrint tPO Expr tPC tSemi { do_print($3); }
+			| tPrint tPO tID tComa Expr tPC tSemi { do_dprint($3, $5); }
 Affect          :       tID tAffect Expr { do_affect($1, $3, DOAFFECT_NONE); $$.address = $3.address; }
 			| tMult tID tAffect Expr { do_affect($2, $4, DOAFFECT_DEREFERENCE); $$.address = $4.address; };
 
