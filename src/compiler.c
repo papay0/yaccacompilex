@@ -110,6 +110,12 @@ void do_return(expression_t retval)
 	istream_printf("RET\n");
 }
 
+void do_assert(expression_t exp)
+{
+	istream_printf("ASRT %d\n", exp.address);
+	tempaddr_unlock(symbols, exp.address);
+}
+
 void do_print(expression_t val)
 {
 	tempaddr_unlock(symbols, val.address);

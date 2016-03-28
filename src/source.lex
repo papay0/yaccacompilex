@@ -18,6 +18,7 @@ tIf 		"if"
 tElse		"else"
 tWhile 		"while"
 tReturn 	"return"
+tAssert     "assert"
 tSemi 		";"
 tComa 		","
 tAffect 	"="
@@ -48,9 +49,10 @@ tNotEquals 	"!="
 {tCHAR}			{ p("CHAR{%s} ", yytext); 	return tCHAR; };
 {tPrint} 		{ p("Print{%s} ", yytext); 	return tPrint; };
 {tIf} 			{ p("If{%s} ", yytext); 	return tIf; };
-{tElse} 			{ p("Else{%s} ", yytext); 	return tElse; };
+{tElse} 		{ p("Else{%s} ", yytext); 	return tElse; };
 {tWhile} 		{ p("While{%s} ", yytext); 	return tWhile; };
 {tReturn} 		{ p("Return{%s} ", yytext); return tReturn; };
+{tAssert}       { p("Assert{%s} ", yytext); return tAssert; };
 {tID} 			{
 	// TODO gérer les fuites mémoires
 	char* newstr = malloc(sizeof(strlen(yytext)+1));

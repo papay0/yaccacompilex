@@ -23,6 +23,7 @@ int main()
     int a = 1;
     int t = g3(100, g2(210, 220), 300);
     print(t);
+    assert(t == 410);
     //truc(mult(&a), a);
     //print(a); // 4
 
