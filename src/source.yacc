@@ -2,7 +2,7 @@
 %token tAnd tOr tEquals tNotEquals tNot
 %token tPrint tIf tElse tWhile tReturn
 %token tSemi tComa tAffect tPlus tMinus tMult tDiv tAmpersand
-%token tPO tPC tAO tAC tCO tCC
+%token tPO tPC tAO tAC tCO tCC tBO tBC
 %token <number> tNumber
 %token <string> tID
 %type  <expression> Expr
@@ -127,6 +127,9 @@ Expr            :       Affect
                         | Expr tMinus Expr      { do_operation($1, $3, &$$, "SUB"); }
                         | Expr tMult Expr       { do_operation($1, $3, &$$, "MUL"); }
                         | Expr tDiv Expr        { do_operation($1, $3, &$$, "DIV"); }
+                        | Expr tBO Expr         { do_operation($1, $3, &$$, "INF"); }
+                        | Expr tBC Expr         { do_operation($1, $3, &$$, "SUP"); }
+			| tNot Expr		{ do_unary_operation($2, &$$, "NOT"); }
 			| tPO Type tPC Expr	{ $4.type = $2; $$ = $4; }
                         | FuncCallExpr 		{ $$ = $1; }
                         | tNumber { do_loadliteral($1, &$$); }

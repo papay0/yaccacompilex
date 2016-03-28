@@ -3,6 +3,20 @@ int b = 20;
 // dé commentair
 --
 
+int mult(int* n)
+{
+    *n = *n * 2;
+}
+
+int main()
+{
+    int a = 1;
+    mult(&a);
+    print(a);
+    mult(&a);
+    print(a);
+}
+/*
 int facto(int n, int n2)
 {
     n = 80;
@@ -32,7 +46,7 @@ int main()
     print(ac, &c);
     print(c, c);
     print(a, a);
-}
+}*/
 
 /*
 int ha(int arg0, int arg1)

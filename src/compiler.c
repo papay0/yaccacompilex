@@ -443,9 +443,13 @@ void do_reference(char* name, expression_t* r)
 	r->address = tempaddr_lock(symbols);
 
 	if(stable_isglobal(symbols, name))
-		istream_printf("PTR %d %d\n", r->address, symbol->address);
-	else
+	{
 		istream_printf("PTR %d @%d\n", r->address, symbol->address);
+	}
+	else
+	{
+		istream_printf("PTR %d %d\n", r->address, symbol->address);
+	}
 
 }
 

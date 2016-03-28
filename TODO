@@ -3,7 +3,7 @@ Arthur :
 
 Jojo :
 - Conflit des IDBUFFER => segfault
-- corriger l'opérateur &  pour les globales
+- corriger l'opérateur &  pour les locales !!!!
 
 
 SOUTENANCE :
