@@ -6,15 +6,29 @@ int b = 20;
 int mult(int* n)
 {
     *n = *n * 2;
+    return *n;
 }
 
+int g2(int x, int y)
+{
+    return y - x;
+}
+
+int g3(int x, int y, int z)
+{
+    return x + y + z;
+}
 int main()
 {
     int a = 1;
-    mult(&a);
-    print(a);
-    mult(&a);
-    print(a);
+    int t = g3(100, g2(210, 220), 300);
+    print(t);
+    //truc(mult(&a), a);
+    //print(a); // 4
+
+    //mult(&a);
+    //print(a); // 8
+    //print(exit, e);
 }
 /*
 int facto(int n, int n2)
@@ -42,6 +56,7 @@ int main()
     print(vb, *b);
     print(a, a);
     print(e, e);
+
     print(ve, *e);
     print(ac, &c);
     print(c, c);

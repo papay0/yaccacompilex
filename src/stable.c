@@ -313,10 +313,13 @@ void tempaddr_unlock(stable_t* symbols, int addr)
 	}
 	// print_debug("unlock_tempaddr: no var to unlock\n");
 }
+extern yylineno;
 void tempaddr_unlock_all(stable_t* symbols)
 {
 	for(int i = 0; i < TEMPADDR_COUNT; i++)
 	{
+		if(tempaddr[i].locked)
+			printf("line %d: tempaddr %d not unlocked, address=%d\n", yylineno, i, tempaddr[i]);
 		tempaddr[i].locked = 0;
 	}
 }

@@ -12,5 +12,14 @@ int idbuffer_size();
 // Selectionne le type des donnees contenues dans le type
 void idbuffer_settype(int type);
 
-
+// Retourne la taille du buffer de paramètres courant
+int parambuffer_size();
+// Crée et empile un nouveau buffer de paramètre 
+void parambuffer_push();
+// Ajoute un paramètre au buffer courant
+void parambuffer_add(void* ptr);
+// Obtient le paramètre i du buffer courant
+void* parambuffer_get(int i);
+// Dépile le buffer de paramètres courant
+void parambuffer_pop();
 

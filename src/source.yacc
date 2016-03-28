@@ -68,21 +68,20 @@ Body            :       BodyStart InstList BodyEnd
 BodyStart       :       tAO { stable_block_enter(symbols); };
 BodyEnd         :       tAC { stable_block_exit(symbols); };
 
-InstList        :       Inst InstList
+InstList        :       Inst InstList 
                         | Inst;
 
 Inst            :       IVarDecl
                         | IVarDeclAff
                         | IVarAff
-                        | IFuncCall
+                        | IFuncCall { }
                         | If
                         | While
                         | Return
                         | Print
 			| error tSemi { handle_syntax_error(); yyerrok; };
 
-IFuncCall       :       FuncCallExpr tSemi { tempaddr_unlock(symbols, $1.address); };
-
+IFuncCall       :       FuncCallExpr tSemi { do_func_call_instruction($1); };
 IVarDeclAff     :       VarDecl tAffect Expr tSemi { do_variable_affectations(&$3); };
 IVarDecl        :       VarDecl tSemi;
 
@@ -136,9 +135,7 @@ Expr            :       Affect
                         | tID { do_loadsymbol($1, &$$); }
                         ;
 
-FuncCallExpr    :       tID tPO Params tPC {
-	do_func_call($1, &$$);
-};
+FuncCallExpr    :       tID tPO Params tPC { do_func_call($1, &$$); };
 
 TypedParams     :       STypedParams
                         | ;
@@ -150,10 +147,11 @@ FuncDeclType	:	Type { idbuffer_init(); };
 
 
 Params          :       SParams
-                        | { idbuffer_init(); };
+                        | { parambuffer_push(); };
 
-SParams         :       Expr tComa SParams { idbuffer_add(&$1); }
-                        | Expr { idbuffer_init(); idbuffer_add(&$1); };
+SParams         :       Expr { istream_printf(".pusharg\n");} 
+			     tComa SParams { do_func_pushparam($1, 0); }
+                        | Expr { parambuffer_push(); do_func_pushparam($1, 1); };
 
 Type            :       PrimType
                         | PtrType

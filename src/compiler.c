@@ -6,6 +6,7 @@
 #include "warning.h"
 #include "stable.h":
 
+extern int yylineno;
 
 
 /* --------------------------
@@ -127,6 +128,27 @@ void do_end_of_function()
 	istream_printf("RET\n");
 }
 
+void check()
+{
+	tempaddr_unlock_all(symbols);	
+}
+
+
+void do_func_call_instruction(expression_t fc_expr)
+{
+	tempaddr_unlock(symbols, fc_expr.address); 
+}
+
+void do_func_pushparam(expression_t expr, int pusharg)
+{
+	printf("expression add : %d\n ", expr.address);
+	expression_t* cpy = malloc(sizeof(expression_t));
+	memcpy(cpy, &expr, sizeof(expression_t));
+	parambuffer_add(cpy);
+	if(pusharg)
+		istream_printf(".pusharg\n");
+}
+
 void do_func_call(char* name, expression_t* r)
 {
 	symbol_t* symbol = stable_find(symbols, name);
@@ -136,11 +158,13 @@ void do_func_call(char* name, expression_t* r)
 	if(symbol->type->kind == TYPE_KIND_FUNCTION)
 	{
 		// Vérification du nombre d'arguments.
-		if(functype->argc == idbuffer_size())
+		if(functype->argc == parambuffer_size())
 		{
-			for(int i = 0; i < idbuffer_size(); i++)
+			for(int i = 0; i < parambuffer_size(); i++)
 			{
-				expression_t* expr = (expression_t*)idbuffer_get(i);
+				expression_t* expr = (expression_t*)parambuffer_get(i);
+
+				printf("param %p\n", expr);
 				type_t* type = expr->type;
 				type_t* type2 = functype->arg_types[i];
 
@@ -161,7 +185,7 @@ void do_func_call(char* name, expression_t* r)
 		{
 			print_warning("call to function %s of type ", name);
 			type_print(symbol->type);
-			print_wnotes(": expected %d arguments, got %d\n", functype->argc, idbuffer_size());
+			print_wnotes(": expected %d arguments, got %d\n", functype->argc, parambuffer_size());
 		}
 	}
 	else
@@ -173,47 +197,58 @@ void do_func_call(char* name, expression_t* r)
 	// *** Structure de la pile :
 	// 1. Paramètres
 	// 2. @retour				<- ctx - 2
-	// 3. contexte				<- ctx - 1
-	// 4. Variables locales.	
-	//		var1				<- ctx
+	// 3. sp					<- ctx - 1
+	// 4. contexte				<- ctx 
+	// 5. Variables locales.	
+	//		var1				<- ctx + 1
 	//		varn				<- sp
 	// ***
 
-	// On récupère l'adresse la plus haute, elle servira pour l'@ de retour.
-	// Ainsi que pour la valeur retournée
+	// On récupère l'adresse la plus haute <=> stack pointer
 	int top = tempaddr_lock(symbols);
+	tempaddr_unlock(symbols, top);
 
 	// Itération sur tous les paramètres
-	for(int i = 0; i < idbuffer_size(); i++)
+	for(int i = 0; i < parambuffer_size(); i++)
 	{
-		expression_t* expr = (expression_t*)idbuffer_get(i);
+		expression_t* expr = (expression_t*)parambuffer_get(i);
 		// Chacune de ces variables est déjà stockée sur la pile
 		// en temps que variable temporaire.
 		
 		// Déverouillage des addresses temporaires	
 		tempaddr_unlock(symbols, expr->address);
 	}
+
+	// On récupère l'@ de la valeur de retour
+	int retvalue_addr = tempaddr_lock(symbols);
+
 	// On ajoute l'@ de retour
-	istream_printf(".args %d\n", idbuffer_size());
 	istream_printf(".ra\n");
 	istream_printf("AFC %d %d\n", top, get_pc()+2);
 
 
 	// L'instruction call va sauvegarder le contexte.
-	// L'instruction RET va écrire à l'adresse 'top' la valeur de retour.
 	int funcaddr = symbol->address;
 	istream_printf("CALL @%d\n", funcaddr);
+	istream_printf(".popargs %d\n", parambuffer_size());
+
+	// Copie de la valeur de retour dans la variable temporaire réservée.
+	istream_printf("COP %d %d\n", retvalue_addr, top+3);
 
 	// Retour de la fonction
 	// La valeur de retour de la fonction est positionnée à CTX+1
 	// top   = @ de l'@retour
-	// top+1 = @ du ctx
-	// top+2 = @ du ctx+1
-	r->address = top + 2;
+	// top+1 = @ du sp
+	// top+2 = @ du ctx
+	// top+3 = @ du ctx+1
+	r->address = retvalue_addr;
 	if(symbol->type->kind == TYPE_KIND_FUNCTION)
 		r->type = functype->return_type;
 	else
 		r->type = symbol->type; // hacky
+
+	// on en a terminé avec le buffer de paramètres actuel.
+	parambuffer_pop();
 }
 
 void do_if(expression_t cond){
@@ -385,14 +420,16 @@ void do_func_implementation(char* name)
 	for(int i = 0; i < idbuffer_size(); i+=2)
 	{
 		symbol_t* s = stable_add(symbols, idbuffer_get(i+1), idbuffer_get(i));
-		// -2 : @retour, contexte
+		// -3 : @retour, contexte, sp
 		// idbuffer_size() + i / 2 => dans l'ordre d'ajout
-		s->address = -2 - (idbuffer_size() - i)/2 + 1;
+		s->address = -3 - (idbuffer_size() - i)/2 + 1;
 	}
 	// Ajout du contexte + @retour
 	symbol_t* ra = stable_add(symbols, "<@>", type_create_primitive("int"));
+	symbol_t* sp = stable_add(symbols, "<sp>", type_create_primitive("int"));
 	symbol_t* ctx = stable_add(symbols, "<ctx>", type_create_primitive("int"));	
-	ra->address = -1;
+	ra->address = -2;
+	sp->address = -1;
 	ctx->address = 0;
 
 	stable_block_exit_dirtyhack(symbols);
