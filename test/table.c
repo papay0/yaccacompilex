@@ -22,7 +22,6 @@ int g3(int x, int y, int z)
 int f(int n)
 {
     if(n == 0) { return 1; }
-    print(n);
     return n * f( n - 1 );
     // return n * f(n - 1) // problème
     // return n * g3(5, g2(n, f(5)), 4) // ultimate
@@ -30,9 +29,6 @@ int f(int n)
 
 int p3(int x, int y, int z)
 {
-    print(x);
-    print(y);
-    print(z);
     return z+y+x;
 }
 
@@ -48,6 +44,7 @@ int main()
     //int a = 3 * p3(4, p(1, 2, 2), 6);
     int a = 3 * p3(10, p3(1, f(5), -1), 20);
     print(a);
+    assert(a == 450);
     //int g = f(5);
     //print(g);
     //assert(t == 410);
