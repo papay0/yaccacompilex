@@ -73,19 +73,16 @@ void parambuffer_push()
 {
 	pbuffer_depth++;
 	pbuffer_entries[pbuffer_depth].size = 0;
-	printf("depth = %d\n", pbuffer_depth);
 }
 
 void parambuffer_add(void* ptr)
 {
-	printf("added param, current size = %d, ptr=%p\n", parambuffer_size(), ptr);
 	pbuffer_entries[pbuffer_depth].buff[pbuffer_entries[pbuffer_depth].size++] = ptr;
 }
 
 void* parambuffer_get(int i)
 {
 	assert(i < parambuffer_size());
-	printf("retrieve depth= %d\n", pbuffer_depth);
 	return pbuffer_entries[pbuffer_depth].buff[i];
 }
 

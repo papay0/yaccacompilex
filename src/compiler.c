@@ -32,7 +32,7 @@ int check_null(symbol_t** symbol, char* name)
 	if(*symbol == NULL)
 	{
 		print_warning("symbol %s has not been declared.\n", name);
-		print_wnotes("note: implicit declaration of symbol %s, type defaults to int.\n", name);
+		print_wnotes("\tnote: implicit declaration of symbol %s, type defaults to int.\n", name);
 		// Déclaration implicite du symbole.
 		type_t* type = type_create_primitive("int");
 		int addr = stable_add(symbols, name, type);
@@ -81,11 +81,11 @@ int do_operation(expression_t e1, expression_t e2,
 	if(!type_compatible(e1.type, e2.type, type_getoptype(opname)))
 	{
 		print_warning("incompatible-pointer-types\n");
-		print_wnotes("note: cannot perform operation %s on types '", opname);
-		type_print(e1.type);
+		print_wnotes("\tnote: cannot perform operation %s on types '", opname);
+		type_sprint(print_wnotes, e1.type);
 		print_wnotes("' and '");
-		type_print(e2.type);
-		print_wnotes(".\n");
+		type_sprint(print_wnotes,e2.type);
+		print_wnotes("'.\n");
 	}
 	r->type = e1.type; // FIXME
 	return newaddr;
@@ -149,7 +149,6 @@ void do_func_call_instruction(expression_t fc_expr)
 
 void do_func_pushparam(expression_t expr, int pusharg)
 {
-	printf("expression add : %d\n ", expr.address);
 	expression_t* cpy = malloc(sizeof(expression_t));
 	memcpy(cpy, &expr, sizeof(expression_t));
 	parambuffer_add(cpy);
@@ -172,7 +171,6 @@ void do_func_call(char* name, expression_t* r)
 			{
 				expression_t* expr = (expression_t*)parambuffer_get(i);
 
-				printf("param %p\n", expr);
 				type_t* type = expr->type;
 				type_t* type2 = functype->arg_types[i];
 
@@ -180,11 +178,11 @@ void do_func_call(char* name, expression_t* r)
 				if(!type_equals(type, type2))
 				{
 					print_warning("call to function %s of type ", name);
-					type_print(symbol->type);
+					type_sprint(print_wnotes,symbol->type);
 					print_wnotes(": expected argument %d of type ", i);
-					type_print(type2);
+					type_sprint(print_wnotes,type2);
 					print_wnotes(" but got ");
-					type_print(type);
+					type_sprint(print_wnotes,type);
 					print_wnotes(" instead.\n");
 				}
 			}
@@ -192,7 +190,7 @@ void do_func_call(char* name, expression_t* r)
 		else
 		{
 			print_warning("call to function %s of type ", name);
-			type_print(symbol->type);
+			type_sprint(print_wnotes,symbol->type);
 			print_wnotes(": expected %d arguments, got %d\n", functype->argc, parambuffer_size());
 		}
 	}
@@ -270,20 +268,15 @@ void do_while(expression_t cond) {
 }
 
 void do_after_while() {
-	printf("I am after close parenthèse while\n");
 }
 
 void do_body_while(expression_t cond) {
-	printf("I am after body while\n");
-	printf("Ici je dois JMP to label qui a été déclaré dans do_while\n");
-	printf("<=> avant la condition du while\n");
 	int index = do_body_return_index()-1;
 	istream_printf("JMP %d\n", index);
 }
 
 void do_before_while() {
 	ltable_add(labels, get_pc());
-	printf("I am before open parenthèse while\n");
 }
 	// [1] --> create label (get_pc()) // DONE (= do_before_while())
 	// [2] --> JMF (-1)
@@ -343,8 +336,12 @@ int do_unary_operation(expression_t e1,
 		if(e1.type->kind != TYPE_KIND_POINTER)
 		{
 			print_warning("invalid-dereference: trying to dereference non-pointer type '");
-			type_print(e1.type);
+			type_sprint(print_wnotes,e1.type);
 			print_wnotes("'.\n");
+			print_wnotes("\tnote: type of expression defaults to '");
+			type_sprint(print_wnotes,e1.type);
+			print_wnotes("'.\n");
+			r->type = e1.type;
 		}
 		else
 		{
@@ -364,10 +361,10 @@ void check_type_affect(type_t* exprtype, type_t* dest)
 	if(!type_compatible(dest, exprtype, OPTYPE_AFFECT))
 	{
 		print_warning("incompatible-pointer-types : \n");
-		print_wnotes("note: types '");
-		type_print(dest);
+		print_wnotes("\tnote: types '");
+		type_sprint(print_wnotes,dest);
 		print_wnotes("' and '");
-		type_print(exprtype);
+		type_sprint(print_wnotes,exprtype);
 		print_wnotes("' are not compatible for affectation.\n");
 	}
 }
@@ -490,7 +487,7 @@ void do_func_implementation(char* name)
 	stable_block_exit_dirtyhack(symbols);
 	stable_setflags(symbols, name, SYMBOL_FUNC | SYMBOL_INITIALIZED);
 
-	stable_print(symbols);
+	// stable_print(symbols);
 	// Affectation du pointeur de la fonction au PC
 	symbol_t* symbol = stable_find(symbols, name);
 	gtable_add(globals, symbol->address, get_pc()); 

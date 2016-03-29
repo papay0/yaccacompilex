@@ -318,8 +318,8 @@ void tempaddr_unlock_all(stable_t* symbols)
 {
 	for(int i = 0; i < TEMPADDR_COUNT; i++)
 	{
-		if(tempaddr[i].locked)
-			printf("line %d: tempaddr %d not unlocked, address=%d\n", yylineno, i, tempaddr[i]);
+		//if(tempaddr[i].locked)
+		//	print_debug("line %d: tempaddr %d not unlocked, address=%d\n", yylineno, i, tempaddr[i]);
 		tempaddr[i].locked = 0;
 	}
 }

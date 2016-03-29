@@ -61,5 +61,8 @@ int type_compatible(type_t* t1, type_t* t2, int equals);
 int type_equals(type_t* t1, type_t* t2);
 
 void type_print(type_t* type);
+// Affiche le type avec la fonction d'affichage donnée.
+void type_sprint(void (*pf) (const char *, ...), type_t* type);
+
 
 #endif

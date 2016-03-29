@@ -10,7 +10,6 @@ static int pc = 0;
 
 void istream_open() {
   fp = fopen ("bin/tmp_yaccacompilex", "w+");
-  printf("J'ai open fp\n");
   //fr = fopen ("bin/yaccacompilex", "w+");
 }
 

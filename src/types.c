@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <assert.h>
 #include "types.h"
@@ -71,35 +72,49 @@ type_t* type_create_func(type_t* return_type, type_t** arg_types, int argc)
 	return ((type_t*)func);
 }
 
-void type_print(type_t* type)
+void type_sprint(void (*pf) (const char *, ...), type_t* type)
 {
 	if(type->kind == TYPE_KIND_PRIMITIVE)
 	{
-		printf("%s", PRIM_NAMES[((primtype_t*)type)->primitive]);
+		pf("%s", PRIM_NAMES[((primtype_t*)type)->primitive]);
 	}
 	else if(type->kind == TYPE_KIND_POINTER)
 	{	
-		type_print(((ptrtype_t*)type)->type);
-		printf("*");
+		type_sprint(pf, ((ptrtype_t*)type)->type);
+		pf("*");
 	}
 	else if(type->kind == TYPE_KIND_FUNCTION)
 	{
 		functype_t* func = (functype_t*)type;
-		type_print(func->return_type);
-		printf("(*) (");
+		type_sprint(pf, func->return_type);
+		pf("(*) (");
 		for(int i = 0; i < func->argc; i++)
 		{
-			type_print(func->arg_types[i]);
+			type_sprint(pf, func->arg_types[i]);
 			if(i != func->argc -1)
-				printf(",");
+				pf(",");
 		}
-		printf(")"); 
+		pf(")"); 
 	}
 	else
 	{
 		print_debug("type_print: unknown type kind %d", type->kind);
 	}
 }
+
+// Fonction printf pouvant être passée en argument à type_sprint
+void print2(const char* format, ...) {
+	va_list args;
+	va_start(args, format);
+	vfprintf(stdout, format, args);
+	va_end(args);
+}
+
+void type_print(type_t* type)
+{
+	return type_sprint(print2, type);
+}
+
 
 int type_equals(type_t* t1, type_t* t2)
 {

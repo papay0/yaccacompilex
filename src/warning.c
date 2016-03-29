@@ -25,11 +25,11 @@ void print_warning( const char* format, ... ) {
   if (DEBUG)
   {
     va_list args;
-    fprintf(stdout, "\033[1;31mwarning line %d: ", yylineno );
+    fprintf(stderr, "line %d: \033[1;31mwarning:\033[0m ", yylineno );
     va_start( args, format );
-    vfprintf(stdout, format, args );
+    vfprintf(stderr, format, args );
     va_end( args );
-	fprintf(stdout, "\033[0m");
+	fprintf(stderr, "\033[0m");
   }
 }
 
@@ -37,11 +37,11 @@ void print_wnotes(const char* format, ... ) {
   if (DEBUG)
   {
     va_list args;
-    fprintf(stdout, "\033[1;31m\t" );
+    fprintf(stderr, "\033[0;31m" );
     va_start( args, format );
-    vfprintf(stdout, format, args );
+    vfprintf(stderr, format, args );
     va_end( args );
-	fprintf(stdout, "\033[0m");
+	fprintf(stderr, "\033[0m");
   }
 }
 
