@@ -1,0 +1,15 @@
+int main(){
+    int a = 100;
+    if (a == 100){
+        int b = 200;
+        if (a == b){
+            int c = 300;
+            while (a == c){
+                int d = 500;
+            }
+            int e = 600;
+        }
+        int f = 700;
+    }
+    int g = 800;
+}

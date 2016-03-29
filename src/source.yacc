@@ -6,7 +6,8 @@
 %token <number> tNumber
 %token <string> tID
 %type  <expression> Expr
-%type  <expression> Cond
+%type  <expression> Cond_if
+%type  <expression> Cond_while
 %type  <expression> Affect
 %type  <expression> FuncCallExpr
 %type  <type> Type
@@ -30,6 +31,7 @@
 %{
         #include <stdio.h>
         #include "compiler.h"
+        #include "ltable.h"
         void yyerror(char const * errorText);
 %}
 
@@ -103,11 +105,13 @@ VarDeclType     :       Type { idbuffer_init(); $$ = $1; };
 IVarAff         :       Affect tSemi;
 
 
-Cond            :       Expr {do_if($1);} 
-If              :       tIf tPO Cond tPC Body { do_body(); }
-                        | tIf tPO Cond tPC Body Else;
+Cond_if         :       Expr {do_if($1);} ;
+Cond_while      :       Expr {do_while($1);};
+If              :       tIf tPO Cond_if tPC Body { do_body(); }
+                        | tIf tPO Cond_if tPC Body Else;
 Else            :       tElse Body;
-While           :       tWhile tPO Cond tPC Body;
+While           :       tWhile POWhile Cond_while PCWhile Body {do_body_while($3);};
+
 Return          :       tReturn Expr tSemi { do_return($2); };
 Assert		: 	tAssert Expr tSemi { do_assert($2); };
 Print           :       tPrint tPO Expr tPC tSemi { do_print($3); }
@@ -175,6 +179,9 @@ PtrType         :       Type tMult {
 PrimType        :       tINT    { $$ = type_create_primitive("int"); }
                         | tCHAR { $$ = type_create_primitive("char"); }
 
+POWhile         :       tPO {do_before_while();};
+PCWhile         :       tPC {do_after_while();};
+
 %%
 
 void yyerror(char const * errorText) { print_warning("%s\n", errorText); }
@@ -182,6 +189,7 @@ int getMode();
 
 int main(int argc, char** argv)
 {
+  	//ltable_t* labels_global;
 	// test_stable(); return 0;
 	if(getMode() == 0)
 		while(1) { yylex(); }
@@ -191,7 +199,7 @@ int main(int argc, char** argv)
 		ctx_init();
 		yyparse();
 		ctx_close();
+		update_label(labels);
 	}
-
 	return 0;
 }

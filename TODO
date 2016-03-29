@@ -1,12 +1,17 @@
 Arthur :
--
+- corriger warningsssssssss
+
+1er colonne : AFC
+2eme : operande 1
+3 : op2
+4 : op4
 
 Jojo :
-- Conflit des IDBUFFER => segfault
-- corriger l'opérateur &  pour les locales !!!!
+- Problèmes lors de l'appel recursif => revoir pusharg poparg
 
 
 SOUTENANCE :
 	- un rapport avec ce qu'on a dev, comment on a fait, points difficiles / résolus...
 	  écrit comme un ingé dans une entreprise
 	- code source à rendre
+

@@ -20,5 +20,6 @@ void ltable_set_main(ltable_t* this, int address);
 int  ltable_get_bootstrap(ltable_t* this);
 void ltable_set_bootstrap(ltable_t* this, int address);
 void ltable_print(ltable_t* this);
+int get_value_at_index(ltable_t* this, int index);
 
 #endif

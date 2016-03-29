@@ -3,3 +3,6 @@
 bin/*
 include/y.tab.h
 build/*
+interpreter/src/__pycache__/
+interpreter/src/parser.out
+interpreter/src/parsetab.py

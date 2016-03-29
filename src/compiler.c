@@ -42,6 +42,7 @@ int check_null(symbol_t** symbol, char* name)
 	return 0;
 }
 
+
 void ctx_init()
 {
 	ctx.verbose = 0;
@@ -70,12 +71,13 @@ int do_operation(expression_t e1, expression_t e2,
 {
 	int addr1 = e1.address;
 	int addr2 = e2.address;
-  	tempaddr_unlock(symbols, addr1);
-  	tempaddr_unlock(symbols, addr2);
-  	int newaddr = tempaddr_lock(symbols);
+	tempaddr_unlock(symbols, addr1);
+	tempaddr_unlock(symbols, addr2);
+	int newaddr = tempaddr_lock(symbols);
 	istream_printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
 	r->address = newaddr;
 
+	// TODO : type check
 	if(!type_compatible(e1.type, e2.type, type_getoptype(opname)))
 	{
 		print_warning("incompatible-pointer-types\n");
@@ -85,7 +87,7 @@ int do_operation(expression_t e1, expression_t e2,
 		type_print(e2.type);
 		print_wnotes(".\n");
 	}
-	r->type = e1.type; // FIXME le type peut dépendre de l'opération
+	r->type = e1.type; // FIXME
 	return newaddr;
 }
 
@@ -210,44 +212,41 @@ void do_func_call(char* name, expression_t* r)
 	//		varn				<- sp
 	// ***
 
-	// On récupère l'adresse la plus haute <=> stack pointer
-	int top = tempaddr_lock(symbols);
-	tempaddr_unlock(symbols, top);
-
-	// Itération sur tous les paramètres
+	
+	int addrs[parambuffer_size()];
+	
+	// Tout en haut au dessus des args : @retour de la fonction
+	int stack_retaddr = tempaddr_lock(symbols);
+	
+	// On libère les addresses des arguments
 	for(int i = 0; i < parambuffer_size(); i++)
 	{
 		expression_t* expr = (expression_t*)parambuffer_get(i);
-		// Chacune de ces variables est déjà stockée sur la pile
-		// en temps que variable temporaire.
-		
-		// Déverouillage des addresses temporaires	
 		tempaddr_unlock(symbols, expr->address);
 	}
 
-	// On récupère l'@ de la valeur de retour
-	int retvalue_addr = tempaddr_lock(symbols);
+	// On lock l'addresse de la variable temporaire
+	int stack_tempvar = tempaddr_lock(symbols);
 
-	// On ajoute l'@ de retour
-	istream_printf(".ra\n");
-	istream_printf("AFC %d %d\n", top, get_pc()+2);
+	int stack_sp = stack_retaddr + 1;
+	int stack_ctx = stack_retaddr + 2;
+	int stack_retval = stack_retaddr + 3;
 
+	// On libère l'@ tout en haut de la pile
+	tempaddr_unlock(symbols, stack_retaddr);
 
-	// L'instruction call va sauvegarder le contexte.
+	// L'instruction call va sauvegarder le contexte + le sp.
 	int funcaddr = symbol->address;
-	istream_printf("CALL @%d\n", funcaddr);
+	istream_printf(".stacksize %d\n", stack_retaddr);
 	istream_printf(".popargs %d\n", parambuffer_size());
+	istream_printf("AFC %d %d\n", stack_retaddr,  get_pc()+2);
+	istream_printf("CALL @%d\n", funcaddr);
 
 	// Copie de la valeur de retour dans la variable temporaire réservée.
-	istream_printf("COP %d %d\n", retvalue_addr, top+3);
+	istream_printf("COP %d %d\n", stack_tempvar, stack_retval);
 
 	// Retour de la fonction
-	// La valeur de retour de la fonction est positionnée à CTX+1
-	// top   = @ de l'@retour
-	// top+1 = @ du sp
-	// top+2 = @ du ctx
-	// top+3 = @ du ctx+1
-	r->address = retvalue_addr;
+	r->address = stack_tempvar;
 	if(symbol->type->kind == TYPE_KIND_FUNCTION)
 		r->type = functype->return_type;
 	else
@@ -257,23 +256,74 @@ void do_func_call(char* name, expression_t* r)
 	parambuffer_pop();
 }
 
-void do_if(expression_t cond){
+
+void do_if(expression_t cond) {
+	// labels->index est l'index courant du tableau de labels.
+	// Puis j'incremente l'index dans le ltable_add();
 	istream_printf("JMF %d %d\n", cond.address, labels->index);
 	ltable_add(labels, -1);
 }
 
+void do_while(expression_t cond) {
+	istream_printf("JMF %d %d\n", cond.address, labels->index);
+	ltable_add(labels, -1);
+}
+
+void do_after_while() {
+	printf("I am after close parenthèse while\n");
+}
+
+void do_body_while(expression_t cond) {
+	printf("I am after body while\n");
+	printf("Ici je dois JMP to label qui a été déclaré dans do_while\n");
+	printf("<=> avant la condition du while\n");
+	int index = do_body_return_index()-1;
+	istream_printf("JMP %d\n", index);
+}
+
+void do_before_while() {
+	ltable_add(labels, get_pc());
+	printf("I am before open parenthèse while\n");
+}
+	// [1] --> create label (get_pc()) // DONE (= do_before_while())
+	// [2] --> JMF (-1)
+	// [3] --> JMP [1]
+	// [4] --> mettre PC dans le dernier -1 (comme do_body())
+	// while([1]   1==2)[2]{
+	// 	printf("TRUC TRUC\n");
+	// 	[3]
+	// }
+	// [4]
+	// int a = 3;
+
 void do_body(){
 	int last_index = -1;
 	for (int i = 0; i < labels->index; i++) {
-			if (labels->labels[i] == -1) {
-				last_index = i;
-			}
+		if (labels->labels[i] == -1) {
+			last_index = i;
+		}
 	}
 	labels->labels[last_index] = get_pc();
+	ltable_print(labels);
+}
+
+int do_body_return_index(){
+	int last_index = -1;
+	for (int i = 0; i < labels->index; i++) {
+		if (labels->labels[i] == -1) {
+		last_index = i;
+		}
+	}
+	labels->labels[last_index] = get_pc()+1;
+	ltable_print(labels);
 
 	// Affiche la table des labels en mode verbose
 	if(ctx.verbose)
 		ltable_print(labels);
+
+	return last_index;
+
+
 }
 
 
@@ -282,9 +332,9 @@ int do_unary_operation(expression_t e1,
 	expression_t* r, char* opname)
 {
 	int addr1 = e1.address;
-  	tempaddr_unlock(symbols, addr1);
-  	int newaddr = tempaddr_lock(symbols);
-  	//printf("%s %d %d\n", opname, newaddr, addr1);
+	tempaddr_unlock(symbols, addr1);
+	int newaddr = tempaddr_lock(symbols);
+	//printf("%s %d %d\n", opname, newaddr, addr1);
 	istream_printf("%s %d %d\n", opname, newaddr, addr1);
 	r->address = newaddr;
 	// TODO : type check
@@ -358,14 +408,14 @@ void do_affect(char* name, expression_t expr, int op)
 		tempaddr_unlock(symbols, addr);
 	}
 }
-
 void do_loadliteral(int literalValue, expression_t* r)
 {
-	int addr = tempaddr_lock(symbols);
-	istream_printf("AFC %d %d\n", addr, literalValue);
-  	r->address = addr;
-  	r->type = type_create_primitive("int");
+		int addr = tempaddr_lock(symbols);
+		istream_printf("AFC %d %d\n", addr, literalValue);
+		r->address = addr;
+		r->type = type_create_primitive("int");
 }
+
 
 void do_loadsymbol( char* name, expression_t* r)
 {
@@ -383,7 +433,6 @@ void do_loadsymbol( char* name, expression_t* r)
 	r->type = symbol->type;
 	r->address = addr;
 }
-
 
 void do_variable_declarations(type_t* type)
 {
@@ -502,18 +551,3 @@ void do_indexing(expression_t array, expression_t index, expression_t* r)
 	do_operation(array, index, &tmp, "ADD");
 	do_unary_operation(tmp, r, "COPA");
 }
-
-/* arr[i] *(arr+i) */
-/*
-int main()
-{
-	stable_t* stable = stable_new();
-	stable_add(stable, "a", 5, 0, 4);
-	stable_add(stable, "b", 130, 0, 4);
-	stable_add(stable, "c", 12, 1, 4);
-	stable_setflags(stable, "b", SYMBOL_INITIALIZED | SYMBOL_CONST);
-	stable_remove(stable, -1);
-	stable_add(stable, "d", 12, 0, 4);
-	stable_print(stable);
-}
-*/

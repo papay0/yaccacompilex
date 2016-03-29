@@ -53,5 +53,8 @@ void ltable_print(ltable_t* this) {
     printf("|%20d|%21d|\n", i, this->labels[i]);
   }
   printf("--------------------------------------------\n");
-  // test : int main(){ int a = 1; if (a==2){ int b = 2; } }
+}
+
+int get_value_at_index(ltable_t* this, int index){
+  return this->labels[index];
 }

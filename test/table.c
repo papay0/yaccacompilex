@@ -18,12 +18,39 @@ int g3(int x, int y, int z)
 {
     return x + y + z;
 }
+
+int f(int n)
+{
+    if(n == 0) { return 1; }
+    print(n);
+    return n * f( n - 1 );
+    // return n * f(n - 1) // problème
+    // return n * g3(5, g2(n, f(5)), 4) // ultimate
+}
+
+int p3(int x, int y, int z)
+{
+    print(x);
+    print(y);
+    print(z);
+    return z+y+x;
+}
+
 int main()
 {
-    int a = 1;
+    /*int a = 0;
     int t = g3(100, g2(210, 220), 300);
-    print(t);
-    assert(t == 410);
+    if(a == 1):
+    {
+        t = t + 2;
+    }*/ 
+    //print(t);
+    //int a = 3 * p3(4, p(1, 2, 2), 6);
+    int a = 3 * p3(10, p3(1, f(5), -1), 20);
+    print(a);
+    //int g = f(5);
+    //print(g);
+    //assert(t == 410);
     //truc(mult(&a), a);
     //print(a); // 4
 
