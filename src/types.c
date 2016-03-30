@@ -174,7 +174,9 @@ int type_compatible(type_t* t1, type_t* t2, int optype)
 				return prim1->primitive == prim2->primitive;
 			// TODO Pour les affectations il faut que la taille du type de réception
 			// soit plus grande.
-			return 1;	
+
+			// aucune des opérandes ne doit être void
+			return prim1->primitive != PRIM_VOID && prim2->primitive != PRIM_VOID;
 		}
 		else if(t1->kind == TYPE_KIND_POINTER)
 		{

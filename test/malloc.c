@@ -5,7 +5,7 @@ int main()
     int* ptr2 = malloc(20);
     int* ptr3 = malloc(30);
     *ptr = 9;
-    void v = free(ptr);
+    free(ptr);
     print(ptr);
     print(ptr2);
     assert(ptr == 512);

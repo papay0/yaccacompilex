@@ -85,6 +85,8 @@ Inst            :       IVarDecl
                         | IFuncCall { } 
                         | If
 			| Affect
+			| Free tSemi
+			| Malloc tSemi
                         | While
                         | Return
 			| Assert
