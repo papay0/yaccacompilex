@@ -50,6 +50,9 @@ void ctx_init()
 	symbols = stable_new();
 	labels = ltable_new();
 	globals = gtable_new();
+	functypebuff = stackbuff_new();
+	vardeclbuff = stackbuff_new();
+	argbuff = stackbuff_new();
 	istream_open();
 	istream_printf(".area start\n");
 }
@@ -131,9 +134,14 @@ void do_dprint(char* name, expression_t val)
 }
 
 // Rajoute le RET à la fin d'une fonction.
-void do_end_of_function()
+void do_end_of_function_impl()
 {
 	istream_printf("RET\n");
+}
+
+void do_end_of_function_decl()
+{
+	stackbuff_pop(argbuff);
 }
 
 void check()
@@ -151,7 +159,7 @@ void do_func_pushparam(expression_t expr, int pusharg)
 {
 	expression_t* cpy = malloc(sizeof(expression_t));
 	memcpy(cpy, &expr, sizeof(expression_t));
-	parambuffer_add(cpy);
+	stackbuff_add(argbuff, cpy);
 	if(pusharg)
 		istream_printf(".pusharg\n");
 }
@@ -165,12 +173,12 @@ void do_func_call(char* name, expression_t* r)
 	if(symbol->type->kind == TYPE_KIND_FUNCTION)
 	{
 		// Vérification du nombre d'arguments.
-		if(functype->argc == parambuffer_size())
+		if(functype->argc == stackbuff_size(argbuff))
 		{
-			for(int i = 0; i < parambuffer_size(); i++)
+			for(int i = 0; i < stackbuff_size(argbuff); i++)
 			{
-				expression_t* expr = (expression_t*)parambuffer_get(i);
-
+				int id = stackbuff_size(argbuff) - i - 1;
+				expression_t* expr = (expression_t*)stackbuff_get(argbuff, id);
 				type_t* type = expr->type;
 				type_t* type2 = functype->arg_types[i];
 
@@ -191,7 +199,7 @@ void do_func_call(char* name, expression_t* r)
 		{
 			print_warning("call to function %s of type ", name);
 			type_sprint(print_wnotes,symbol->type);
-			print_wnotes(": expected %d arguments, got %d\n", functype->argc, parambuffer_size());
+			print_wnotes(": expected %d arguments, got %d\n", functype->argc, stackbuff_size(argbuff));
 		}
 	}
 	else
@@ -211,15 +219,15 @@ void do_func_call(char* name, expression_t* r)
 	// ***
 
 	
-	int addrs[parambuffer_size()];
+	int addrs[stackbuff_size(argbuff)];
 	
 	// Tout en haut au dessus des args : @retour de la fonction
 	int stack_retaddr = tempaddr_lock(symbols);
 	
 	// On libère les addresses des arguments
-	for(int i = 0; i < parambuffer_size(); i++)
+	for(int i = 0; i < stackbuff_size(argbuff); i++)
 	{
-		expression_t* expr = (expression_t*)parambuffer_get(i);
+		expression_t* expr = (expression_t*)stackbuff_get(argbuff,i);
 		tempaddr_unlock(symbols, expr->address);
 	}
 
@@ -236,7 +244,7 @@ void do_func_call(char* name, expression_t* r)
 	// L'instruction call va sauvegarder le contexte + le sp.
 	int funcaddr = symbol->address;
 	istream_printf(".stacksize %d\n", stack_retaddr);
-	istream_printf(".popargs %d\n", parambuffer_size());
+	istream_printf(".popargs %d\n", stackbuff_size(argbuff));
 	istream_printf("AFC %d %d\n", stack_retaddr,  get_pc()+2);
 
 	if(stable_isglobal(symbols, name))
@@ -259,7 +267,7 @@ void do_func_call(char* name, expression_t* r)
 		r->type = symbol->type; // hacky
 
 	// on en a terminé avec le buffer de paramètres actuel.
-	parambuffer_pop();
+	stackbuff_pop(argbuff);
 }
 
 
@@ -460,32 +468,41 @@ void do_loadsymbol( char* name, expression_t* r)
 
 void do_variable_declarations(type_t* type)
 {
-	for(int i = 0; i < idbuffer_size(); i++)
+	for(int i = 0; i < stackbuff_size(vardeclbuff); i++)
 	{
-		stable_add(symbols, (char*)idbuffer_get(i), type);
-		istream_printf(".local %s\n", idbuffer_get(i));
+		stable_add(symbols, (char*)stackbuff_get(vardeclbuff, i), type);
+		istream_printf(".local %s\n", stackbuff_get(vardeclbuff, i));
 	}
+}
+
+void do_end_of_variable_declaration()
+{
+	// Appelé après la fin d'une déclaration de variable (sans affectation).
+	stackbuff_pop(vardeclbuff);
 }
 
 void do_variable_affectations(expression_t* expr)
 {
-	for(int i = 0; i < idbuffer_size(); i++)
+	for(int i = 0; i < stackbuff_size(vardeclbuff); i++)
 	{
-		char* symbol = (char*)idbuffer_get(i);
+		char* symbol = (char*)stackbuff_get(vardeclbuff, i);
 		do_affect(symbol, *expr, DOAFFECT_UNLOCK);
 	}
+	stackbuff_pop(vardeclbuff);
 }
 
 void do_func_declaration(char* name, type_t* return_type) 
 {
-	int size = idbuffer_size()/2;
+	int size = stackbuff_size(argbuff)/2;
 	type_t** args = malloc(sizeof(type_t*)*size);
 	// Ici idbuffer contient :
 	// i : type du symbole, i+1 : nom du symbole
-	for(int i = 0; i < idbuffer_size(); i+=2)
+	for(int i = 0; i < stackbuff_size(argbuff); i+=2)
 	{
-		args[i/2] = idbuffer_get(i);
+		args[i/2] = stackbuff_get(argbuff, i);
 	}
+
+	// On crée le type et on ajoute la fonction à la table des symboles.
 	type_t* functype = type_create_func(return_type, args, size);
 	stable_add(symbols, name, functype);	
 	stable_setflags(symbols, name, SYMBOL_FUNC);
@@ -496,12 +513,12 @@ void do_func_implementation(char* name)
 {
 	// Déclaration des arguments de la fonction dans la table des symboles
 	stable_block_enter(symbols);
-	for(int i = 0; i < idbuffer_size(); i+=2)
+	for(int i = 0; i < stackbuff_size(argbuff); i+=2)
 	{
-		symbol_t* s = stable_add(symbols, idbuffer_get(i+1), idbuffer_get(i));
+		symbol_t* s = stable_add(symbols, stackbuff_get(argbuff, i+1), stackbuff_get(argbuff, i));
 		// -3 : @retour, contexte, sp
 		// idbuffer_size() + i / 2 => dans l'ordre d'ajout
-		s->address = -3 - (idbuffer_size() - i)/2 + 1;
+		s->address = -3 - (stackbuff_size(argbuff) - i)/2 + 1;
 	}
 	// Ajout du contexte + @retour
 	symbol_t* ra = stable_add(symbols, "<@>", type_create_primitive("int"));
@@ -541,12 +558,16 @@ void do_array_declaration(type_t* type, char* name, int size)
 
 type_t* do_makefunctype(type_t* return_type)
 {
-  	type_t** args = (type_t**)malloc(sizeof(type_t*)*idbuffer_size());
-  	for(int i = 0; i < idbuffer_size(); i+=2)
+	int size = stackbuff_size(functypebuff);
+	int argc = size;
+  	type_t** args = (type_t**)malloc(sizeof(type_t*)*argc);
+  	for(int i = 0; i < size; i++)
 	{
-    	args[idbuffer_size() - i - 1] = idbuffer_get(i);
+		int id = size - i - 1;
+    	args[id] = stackbuff_get(functypebuff, i);
 	}
-	type_t* func = type_create_func(return_type, args, idbuffer_size());
+	stackbuff_pop(functypebuff);
+	type_t* func = type_create_func(return_type, args, argc);
 	return func;
 }
 

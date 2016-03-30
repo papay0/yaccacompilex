@@ -18,6 +18,7 @@ tIf 		"if"
 tElse		"else"
 tWhile 		"while"
 tReturn 	"return"
+tMalloc     "malloc"
 tAssert     "assert"
 tSemi 		";"
 tComa 		","
@@ -53,6 +54,7 @@ tNotEquals 	"!="
 {tWhile} 		{ p("While{%s} ", yytext); 	return tWhile; };
 {tReturn} 		{ p("Return{%s} ", yytext); return tReturn; };
 {tAssert}       { p("Assert{%s} ", yytext); return tAssert; };
+{tMalloc}       { p("Malloc{%s} ", yytext); return tMalloc; };
 {tID} 			{
 	// TODO gérer les fuites mémoires
 	char* newstr = malloc(sizeof(strlen(yytext)+1));

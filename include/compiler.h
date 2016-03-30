@@ -51,5 +51,7 @@ context_t ctx;
 stable_t* symbols;
 ltable_t* labels;
 gtable_t* globals;
-
+stackbuff_t* functypebuff;
+stackbuff_t* argbuff;
+stackbuff_t* vardeclbuff;
 #endif

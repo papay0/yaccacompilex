@@ -57,8 +57,8 @@ GlobalDecls	:	IVarDecl GlobalDecls
 FuncDecls	:	FuncDecl FuncDecls
 			| ;
 
-FuncDecl        :       FuncImplProto Body { do_end_of_function();  }
-			| FuncProto tSemi;
+FuncDecl        :       FuncImplProto { stackbuff_pop(argbuff); } Body { do_end_of_function_impl();  }
+			| FuncProto tSemi { do_end_of_function_decl(); }
 
 FuncImplProto	:	FuncProto { do_func_implementation($1); };
 
@@ -76,7 +76,7 @@ InstList        :       Inst InstList
 Inst            :       IVarDecl
                         | IVarDeclAff
                         | IVarAff
-                        | IFuncCall { }
+                        | IFuncCall { } 
                         | If
                         | While
                         | Return
@@ -86,7 +86,7 @@ Inst            :       IVarDecl
 
 IFuncCall       :       FuncCallExpr tSemi { do_func_call_instruction($1); };
 IVarDeclAff     :       VarDecl tAffect Expr tSemi { do_variable_affectations(&$3); };
-IVarDecl        :       VarDecl tSemi;
+IVarDecl        :       VarDecl tSemi { do_end_of_variable_declaration(); };
 
 VarDecl         :       VarDeclType IDList { do_variable_declarations($1); }
 			| VarDeclType tID tCO tNumber tCC { do_array_declaration($1, $2, $4); };
@@ -98,9 +98,8 @@ SIDList         :       tComa VarDeclID SIDList
                         | tComa VarDeclID
                         ;
 
-VarDeclID       :       tID { idbuffer_addstr($1); };
-
-VarDeclType     :       Type { idbuffer_init(); $$ = $1; };
+VarDeclID       :       tID { stackbuff_addstr(vardeclbuff, $1); };
+VarDeclType     :       Type { stackbuff_push(vardeclbuff); $$ = $1; };
 
 IVarAff         :       Affect tSemi;
 
@@ -148,16 +147,17 @@ TypedParams     :       STypedParams
 
 STypedParams    :       TypedParam tComa STypedParams
                         | TypedParam;
-TypedParam      :       Type tID { idbuffer_add($1); idbuffer_add($2); };
-FuncDeclType	:	Type { idbuffer_init(); };
+
+TypedParam      :       Type tID { stackbuff_add(argbuff, $1); stackbuff_add(argbuff, $2); };
+FuncDeclType	:	Type { stackbuff_push(argbuff); };
 
 
 Params          :       SParams
-                        | { parambuffer_push(); };
+                        | { stackbuff_push(argbuff); };
 
 SParams         :       Expr { istream_printf(".pusharg\n");} 
-			     tComa SParams { do_func_pushparam($1, 0); }
-                        | Expr { parambuffer_push(); do_func_pushparam($1, 1); };
+		     		tComa SParams { do_func_pushparam($1, 0); }
+                        | Expr { stackbuff_push(argbuff); do_func_pushparam($1, 1); };
 
 Type            :       PrimType
                         | PtrType
@@ -168,13 +168,11 @@ FuncType        :       Type tPO tMult tPC tPO TypeList tPC { $$ = do_makefuncty
 TypeList        :       STypeList {  }
                         | { };
 
-STypeList       :       Type tComa STypeList { idbuffer_add($1); }
-                        | Type { idbuffer_init(); idbuffer_add($1); };
+STypeList       :       Type tComa STypeList { stackbuff_add(functypebuff, $1); }
+                        | Type { stackbuff_push(functypebuff); stackbuff_add(functypebuff, $1); };
 
 
-PtrType         :       Type tMult {
-  $$ = type_create_ptr($1);
-};
+PtrType         :       Type tMult { $$ = type_create_ptr($1); };
 
 PrimType        :       tINT    { $$ = type_create_primitive("int"); }
                         | tCHAR { $$ = type_create_primitive("char"); }

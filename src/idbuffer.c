@@ -2,94 +2,54 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "idbuffer.h"
 
-#define MAX_BUFF 128
-// Ce buffer contient la liste des identifiers concernés par une déclaration.
-// Ex : int a, b, c, d, e; => idbuffer = ["a", "b", "c", "d", "e"]
-
-int buffsize;
-void* idbuffer[MAX_BUFF];
-int bufftype;
-
-void idbuffer_settype(int type)
-{
-	bufftype = type;	
-}
-
-
-// Initialise le idbuffer
-void idbuffer_init()
-{
-	buffsize = 0;	
-	for(int i = 0; i < buffsize; i++)
-	{
-		free(idbuffer[i]);
-	}
-}
-
-// Ajoute un identifier au buffer
-void idbuffer_addstr(char* identifier)
-{
-	assert(buffsize < MAX_BUFF);
-	char* nbuff = (char*)malloc(strlen(identifier)+1);
-	strcpy(nbuff, identifier);
-	idbuffer[buffsize++] = nbuff;
-}
-
-void idbuffer_add(void* ptr)
-{
-	assert(buffsize < MAX_BUFF);
-	idbuffer[buffsize++] = ptr;	
-}
-
-void* idbuffer_get(int i)
-{
-	assert(i < buffsize);
-	return idbuffer[i];
-}
-
-int idbuffer_size()
-{
-	return buffsize;
-}
 /* ----------------------------------------------------------------------------
- * PARAMBUFFER 
+ * STACKBUFFER
  * --------------------------------------------------------------------------*/
-typedef struct pbuffer_entry
+extern int yylineno;
+stackbuff_t* stackbuff_new()
 {
-	int size;
-	void* buff[MAX_BUFF];
-} pbuffer_entry_t;
-
-pbuffer_entry_t pbuffer_entries[MAX_BUFF];
-int pbuffer_depth = -1;
-
-int parambuffer_size()
-{
-	return pbuffer_entries[pbuffer_depth].size;
+	stackbuff_t* buff = (stackbuff_t*)malloc(sizeof(stackbuff_t));
+	buff->depth = -1;
+	return buff;
 }
 
-void parambuffer_push()
+int stackbuff_size(stackbuff_t* buff)
 {
-	pbuffer_depth++;
-	pbuffer_entries[pbuffer_depth].size = 0;
+	return buff->entries[buff->depth].size;
 }
 
-void parambuffer_add(void* ptr)
+void stackbuff_push(stackbuff_t* buff)
 {
-	pbuffer_entries[pbuffer_depth].buff[pbuffer_entries[pbuffer_depth].size++] = ptr;
+	buff->depth++;
+	buff->entries[buff->depth].size = 0;
+	// print_warning("line %d: [DEBUG] PUSH\n", yylineno);
 }
 
-void* parambuffer_get(int i)
+void stackbuff_add(stackbuff_t* buff, void* ptr)
 {
-	assert(i < parambuffer_size());
-	return pbuffer_entries[pbuffer_depth].buff[i];
+	// print_warning("line %d: [DEBUG] buff=%p size=%d, ptr=%d\n", yylineno, buff, buff->depth, ptr);
+	buff->entries[buff->depth].buff[buff->entries[buff->depth].size++] = ptr;
 }
 
-void parambuffer_pop()
+void stackbuff_addstr(stackbuff_t* buff, char* ptr)
 {
-	assert(pbuffer_depth >= 0);
-	for(int i = 0; i < parambuffer_size(); i++)
-		free(parambuffer_get(i));
-	pbuffer_depth--;
+    char* nbuff = (char*)malloc(strlen(ptr)+1);
+    strcpy(nbuff, ptr);
+	// print_warning("[DEBUG] buff=%p size=%d, ptr=%d\n", buff, buff->depth, ptr);
+	buff->entries[buff->depth].buff[buff->entries[buff->depth].size++] = nbuff;
+}
+
+void* stackbuff_get(stackbuff_t* buff, int i)
+{
+	assert(i < stackbuff_size(buff));
+	return buff->entries[buff->depth].buff[i];
+}
+
+void stackbuff_pop(stackbuff_t* buff)
+{
+	// print_warning("line %d: [DEBUG] POP\n", yylineno);
+	assert(buff->depth >= 0);
+	buff->depth--;
 }
