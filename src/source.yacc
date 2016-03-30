@@ -10,6 +10,11 @@
 %type  <expression> Cond_while
 %type  <expression> Affect
 %type  <expression> FuncCallExpr
+%type  <expression> Free
+%type  <expression> Malloc
+
+
+
 %type  <type> Type
 %type  <type> PrimType
 %type  <type> VarDeclType
@@ -74,10 +79,12 @@ InstList        :       Inst InstList
                         | Inst;
 
 Inst            :       IVarDecl
+			| Expr
                         | IVarDeclAff
                         | IVarAff
                         | IFuncCall { } 
                         | If
+			| Affect
                         | While
                         | Return
 			| Assert
@@ -113,13 +120,15 @@ While           :       tWhile POWhile Cond_while PCWhile Body {do_body_while($3
 
 Return          :       tReturn Expr tSemi { do_return($2); };
 Assert		: 	tAssert Expr tSemi { do_assert($2); };
+Malloc		:	tMalloc tPO Expr tPC  { do_malloc($3, &$$); };
+Free		:	tFree   tPO Expr tPC { do_free($3, &$$); };
 Print           :       tPrint tPO Expr tPC tSemi { do_print($3); }
-			| tPrint tPO tID tComa Expr tPC tSemi { do_dprint($3, $5); }
-Affect          :       tID tAffect Expr { do_affect($1, $3, DOAFFECT_NONE); $$.address = $3.address; }
-			| tMult tID tAffect Expr { do_affect($2, $4, DOAFFECT_DEREFERENCE); $$.address = $4.address; };
+			| tPrint tPO tID tComa Expr tPC tSemi { do_dprint($3, $5); };
 
-Expr            :       Affect
-                        | tPO Expr tPC          { $$ = $2;}
+Affect          :       tID tAffect Expr { do_affect($1, $3, &$$, DOAFFECT_NONE); }
+			| tMult tID tAffect Expr { do_affect($2, $4, &$$, DOAFFECT_DEREFERENCE); };
+
+Expr            :       tPO Expr tPC          { $$ = $2;}
                         | Expr tCO Expr tCC     { do_indexing($1, $3, &$$); }
                         | tMult Expr            { do_unary_operation($2, &$$, "COPA"); }
                         | tAmpersand tID        { do_reference($2, &$$); }
@@ -134,8 +143,8 @@ Expr            :       Affect
                         | Expr tBO Expr         { do_operation($1, $3, &$$, "INF"); }
                         | Expr tBC Expr         { do_operation($1, $3, &$$, "SUP"); }
 			| tNot Expr		{ do_unary_operation($2, &$$, "NOT"); }
-			| tMalloc tPO Expr tPC  { do_malloc($3, &$$); }
-			| tFree tPO Expr tPC	{ do_free($3, &$$); }
+			| Malloc
+			| Free			
 			| tPO Type tPC Expr	{ $4.type = $2; $$ = $4; }
                         | FuncCallExpr 		{ $$ = $1; }
                         | tNumber { do_loadliteral($1, &$$); }

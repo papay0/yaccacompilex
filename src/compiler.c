@@ -417,7 +417,7 @@ void do_affect_dereference(expression_t dst, expression_t src,
 	}
 
 }
-void do_affect(char* name, expression_t expr, int op)
+void do_affect(char* name, expression_t expr, expression_t* r, int op)
 {
 	symbol_t* symbol = stable_find(symbols, name);
 	check_null(&symbol, name);
@@ -448,10 +448,9 @@ void do_affect(char* name, expression_t expr, int op)
 	}
 
 	check_type_affect(expr.type, symbol->type);
-	if((op & DOAFFECT_UNLOCK) != 0) 
-	{ 
-		tempaddr_unlock(symbols, addr);
-	}
+	// On affecte la valeur retour à l'expression de droite.
+	r->address = expr.address;
+	r->type = expr.type;
 }
 void do_loadliteral(int literalValue, expression_t* r)
 {
@@ -499,7 +498,9 @@ void do_variable_affectations(expression_t* expr)
 	for(int i = 0; i < stackbuff_size(vardeclbuff); i++)
 	{
 		char* symbol = (char*)stackbuff_get(vardeclbuff, i);
-		do_affect(symbol, *expr, DOAFFECT_UNLOCK);
+		expression_t tmp;
+		do_affect(symbol, *expr, &tmp, DOAFFECT_NONE);
+		tempaddr_unlock(symbols, tmp.address);
 	}
 	stackbuff_pop(vardeclbuff);
 }

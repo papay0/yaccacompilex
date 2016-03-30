@@ -10,7 +10,7 @@ def endcol():
 
 mode = 0
 if len(sys.argv)  == 1:
-    tests = ["table.c", "facto.c", "func.c", "while.c", "ptr.c"]
+    tests = ["table.c", "facto.c", "func.c", "while.c", "ptr.c", "malloc.c", "func_sale.c"]
     for test in tests:
         print("+ Testing", test);
         ret = subprocess.call("bin/parser < test/" + test + " > bin/parser_out", shell=True)
