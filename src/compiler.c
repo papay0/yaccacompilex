@@ -4,7 +4,7 @@
 #include "compiler.h"
 #include "instruction_stream.h"
 #include "warning.h"
-#include "stable.h":
+#include "stable.h"
 
 extern int yylineno;
 
@@ -35,7 +35,7 @@ int check_null(symbol_t** symbol, char* name)
 		print_wnotes("\tnote: implicit declaration of symbol %s, type defaults to int.\n", name);
 		// Déclaration implicite du symbole.
 		type_t* type = type_create_primitive("int");
-		int addr = stable_add(symbols, name, type);
+		stable_add(symbols, name, type);
 		*symbol = stable_find(symbols, name);
 		return 1;
 	}
@@ -149,6 +149,19 @@ void check()
 	tempaddr_unlock_all(symbols);	
 }
 
+void do_malloc(expression_t size, expression_t* expr)
+{
+	istream_printf("MAL %d %d\n", size.address, size.address);
+	expr->type = type_create_primitive("int");
+	expr->address = size.address;
+}
+
+void do_free(expression_t addr, expression_t* expr)
+{
+	istream_printf("FRE %d\n", addr.address);
+	expr->type = type_create_primitive("void");
+	expr->address = 0;
+}
 
 void do_func_call_instruction(expression_t fc_expr)
 {
@@ -399,7 +412,7 @@ void do_affect_dereference(expression_t dst, expression_t src,
 	else
 	{
 		istream_printf("COPB %d %d\n", dst.address, src.address);
-		r->address = dst.type;
+		r->address = dst.address;
 		r->type = dst.type; // FIXME
 	}
 

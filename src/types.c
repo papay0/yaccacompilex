@@ -20,10 +20,11 @@ const int OPTYPE_LOGIC 			= 0x04;
 const int OPTYPE_STRICT 		= 0x05;
 
 // Taille des types primitifs en octets.
-const int PRIM_SIZES[2] = { 1, 4 };
-const char* PRIM_NAMES[2] = {"char", "int"};
-const int PRIM_CHAR = 0x00;
-const int PRIM_INT = 0x01;
+const int PRIM_SIZES[3] = { 0, 1, 4 };
+const char* PRIM_NAMES[3] = { "void", "char", "int"};
+const int PRIM_VOID = 0x00;
+const int PRIM_CHAR = 0x01;
+const int PRIM_INT = 0x02;
 
 int type_getsize(type_t* type)
 {
@@ -54,6 +55,8 @@ type_t* type_create_primitive(char* name)
 		type->primitive = PRIM_CHAR;
 	else if(strcmp(name, "int") == 0)
 		type->primitive = PRIM_INT;
+	else if(strcmp(name, "void") == 0)
+		type->primitive = PRIM_VOID;
 	else
 		assert(0);
 	return ((type_t*)type);

@@ -13,12 +13,14 @@ tNumber 	(\-)?([0-9]+)(e(\+|\-)[0-9]+)*
 tID 		([a-zA-Z_]+[0-9a-zA-Z_]*)
 tINT 		"int"
 tCHAR		"char"
+tVOID       "void"
 tPrint 		"print"
 tIf 		"if"
 tElse		"else"
 tWhile 		"while"
 tReturn 	"return"
 tMalloc     "malloc"
+tFree       "free"
 tAssert     "assert"
 tSemi 		";"
 tComa 		","
@@ -48,6 +50,7 @@ tNotEquals 	"!="
 {tComment}		{  }
 {tINT} 			{ p("INT{%s} ", yytext); 	return tINT; };
 {tCHAR}			{ p("CHAR{%s} ", yytext); 	return tCHAR; };
+{tVOID}			{ p("VOID{%s} ", yytext); 	return tVOID; };
 {tPrint} 		{ p("Print{%s} ", yytext); 	return tPrint; };
 {tIf} 			{ p("If{%s} ", yytext); 	return tIf; };
 {tElse} 		{ p("Else{%s} ", yytext); 	return tElse; };
@@ -55,6 +58,8 @@ tNotEquals 	"!="
 {tReturn} 		{ p("Return{%s} ", yytext); return tReturn; };
 {tAssert}       { p("Assert{%s} ", yytext); return tAssert; };
 {tMalloc}       { p("Malloc{%s} ", yytext); return tMalloc; };
+{tFree}         { p("Free{%s} ", yytext); return tFree; };
+
 {tID} 			{
 	// TODO gérer les fuites mémoires
 	char* newstr = malloc(sizeof(strlen(yytext)+1));

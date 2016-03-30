@@ -20,9 +20,10 @@ const int OPTYPE_STRICT;
 
 
 // Taille des types primitifs en octets.
-const int PRIM_SIZES[2];
+const int PRIM_SIZES[3];
 const int PRIM_CHAR;
 const int PRIM_INT;
+const int PRIM_VOID;
 
 // Type (générique)
 typedef struct type {

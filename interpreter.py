@@ -1,18 +1,8 @@
 import sys
+import collections
 from optparse import OptionParser
 import inspect
 
-if len(sys.argv) < 2:
-    print("usage: interpreter.py <asmfile> [<mode>]");
-    sys.exit(1)
-
-mode = 0
-if len(sys.argv) == 3:
-    mode = int(sys.argv[2])
-
-f = open(sys.argv[1], 'r');
-instructions = [[v.strip() for v in line.lower().strip('\n').split(' ')] for line in f]
-f.close()
 
 def col(n):
     return "\033[0;" + str(n) + "m"
@@ -20,14 +10,21 @@ def col(n):
 def endcol():
     return "\033[0m"
 
+
 STATUS_OK = 0
 STATUS_ASSERT_FAILED = 1
+MemSeg = collections.namedtuple('MemSeg', 'addr size')
+
 class Debugger:
+    
     def __init__(self, instructions, mode=0):
+        self.mem_size = 1024;
+        self.stack_size = 512;
         self.ip = 0
         self.mode = mode
         self.instructions = instructions;
-        self.memory = [0 for i in range(0, 256)]
+        self.memory = [0 for i in range(0, self.mem_size)]
+        self.dynamic_allocs = [] # tuples (addr, size)
         self.args_c = 0
         self.ctx = 0
         self.sp = 0
@@ -178,6 +175,42 @@ class Debugger:
         #for i in range(0, self.args_c):
         #    self.localvars[-1][self.ctx - 2 - self.args_c + i] = "(arg" + str(i) + ")"
 
+    def op_fre(self, line, params):
+        addr = self.memory[self.addr(params[0])]
+        segment = None
+        for seg in self.dynamic_allocs:
+            if seg.addr == addr:
+                segment = seg
+                break
+
+        # Si le segment n'existe pas : erreur
+        if segment == None:
+            print(col(31) + "free: no memory to free at address " + str(addr) + endcol())
+            self.return_code = 1
+            self.ended = True
+            return
+
+        # Si le segment existe, on le supprime
+        self.dynamic_allocs.remove(seg)
+        
+    def op_mal(self, line, params):
+        dst_addr, size_addr = params[0], params[1]
+        size = self.memory[self.addr(size_addr)]
+        dst = self.addr(dst_addr);
+
+        alloc_addr = self.stack_size
+        for seg in self.dynamic_allocs:
+            alloc_addr = max(seg.addr+seg.size, alloc_addr)
+        
+        self.dynamic_allocs.append(MemSeg(alloc_addr, size))
+        if alloc_addr + size > self.mem_size:
+            print(col(31) + "malloc: not enough memory" + endcol())
+            self.return_code = 1
+            self.ended = True
+            return
+
+        self.memory[dst] = alloc_addr;
+
  
     def macro_function(self, line, params):
         self.area = params[0]
@@ -290,6 +323,18 @@ class Debugger:
                     self.members[name](line, params)
 
 
+# Initialisation du script
+if len(sys.argv) < 2:
+    print("usage: interpreter.py <asmfile> [<mode>]");
+    sys.exit(1)
+
+mode = 0
+if len(sys.argv) == 3:
+    mode = int(sys.argv[2])
+
+f = open(sys.argv[1], 'r');
+instructions = [[v.strip() for v in line.lower().strip('\n').split(' ')] for line in f]
+f.close()
 
 s = Debugger(instructions, mode)
 try:

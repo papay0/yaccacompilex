@@ -1,7 +1,7 @@
 CC=gcc
 LD=gcc
 INCLUDE=-Iinclude
-CCFLAGS=-g -Werror=incompatible-pointer-types -std=c99
+CCFLAGS=-g -Werror=incompatible-pointer-types -Werror=int-conversion -std=c99
 LDFLAGS=-g -ll
 
 all: bin/parser

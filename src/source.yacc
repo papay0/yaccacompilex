@@ -1,6 +1,6 @@
-%token tINT tCHAR
+%token tINT tCHAR tVOID
 %token tAnd tOr tEquals tNotEquals tNot
-%token tPrint tIf tElse tWhile tReturn tAssert
+%token tPrint tIf tElse tWhile tReturn tAssert tMalloc tFree
 %token tSemi tComa tAffect tPlus tMinus tMult tDiv tAmpersand
 %token tPO tPC tAO tAC tCO tCC tBO tBC
 %token <number> tNumber
@@ -134,6 +134,8 @@ Expr            :       Affect
                         | Expr tBO Expr         { do_operation($1, $3, &$$, "INF"); }
                         | Expr tBC Expr         { do_operation($1, $3, &$$, "SUP"); }
 			| tNot Expr		{ do_unary_operation($2, &$$, "NOT"); }
+			| tMalloc tPO Expr tPC  { do_malloc($3, &$$); }
+			| tFree tPO Expr tPC	{ do_free($3, &$$); }
 			| tPO Type tPC Expr	{ $4.type = $2; $$ = $4; }
                         | FuncCallExpr 		{ $$ = $1; }
                         | tNumber { do_loadliteral($1, &$$); }
@@ -176,6 +178,7 @@ PtrType         :       Type tMult { $$ = type_create_ptr($1); };
 
 PrimType        :       tINT    { $$ = type_create_primitive("int"); }
                         | tCHAR { $$ = type_create_primitive("char"); }
+			| tVOID { $$ = type_create_primitive("void"); };
 
 POWhile         :       tPO {do_before_while();};
 PCWhile         :       tPC {do_after_while();};
