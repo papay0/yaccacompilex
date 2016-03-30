@@ -24,10 +24,10 @@ if len(sys.argv)  == 1:
         else:
             print("\t... " + col(31) + test + ": FAILED" + endcol())
 
-elif len(sys.argv)  == 2:
+elif len(sys.argv)  >= 2:
     test = sys.argv[1]
-    subprocess.call("bin/parser < " + test + " > bin/parser_out" + "&& python3 interpreter.py bin/yaccacompilex 1", shell=True)
-    mode = 1
+    mode = "1" if len(sys.argv) == "2" else sys.argv[2]
+    subprocess.call("bin/parser < " + test + " > bin/parser_out" + "&& python3 interpreter.py bin/yaccacompilex " + mode, shell=True)
 
 
 

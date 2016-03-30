@@ -33,7 +33,7 @@ void idbuffer_addstr(char* identifier)
 	assert(buffsize < MAX_BUFF);
 	char* nbuff = (char*)malloc(strlen(identifier)+1);
 	strcpy(nbuff, identifier);
-	idbuffer[buffsize++] = nbuff;		
+	idbuffer[buffsize++] = nbuff;
 }
 
 void idbuffer_add(void* ptr)

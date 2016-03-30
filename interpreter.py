@@ -43,6 +43,10 @@ class Debugger:
     def tohex(self, v):
         return format(int(v), "02") 
         
+    def print_instruction(self, i):
+        print(self.tohex(self.instructions[i][0][:-1]),
+                      ' '.join(self.instructions[i][1:]))
+
     def addr(self, v):
         if(v.startswith('@')):
             return int(v[1:])
@@ -156,6 +160,11 @@ class Debugger:
         sp_addr = self.sp + 1
         ctx_addr = self.sp + 2
         new_sp = ctx_addr;
+
+        # Placement de l'instruction pointeur
+        self.ip = self.memory[self.addr(params[0])] - 1
+        self.ip -= 1 # ceci est pour tomber sur les macros .function
+
         # Arguments et @ de retour déjà sauvegardés
         # on empile le contexte 
         self.memory[ctx_addr] = self.ctx
@@ -163,9 +172,7 @@ class Debugger:
         self.ctx = ctx_addr
         self.sp = new_sp
 
-        self.ip = self.memory[self.addr(params[0])] - 1
-        self.ip -= 1 # ceci est pour tomber sur les macros .function
-
+        
         # On push les variables locales [debug]
         self.localvars.append(dict())
         #for i in range(0, self.args_c):
@@ -204,9 +211,9 @@ class Debugger:
             add += "(" + self.localvars[-1][val] + ") "
 
         
-        if val > self.sp and val <= self.sp + self.args_c:
-            argn = val - self.sp
-            add += "(arg" + str(argn) + ") "
+        #if val > self.sp and val <= self.sp + self.args_c:
+        #    argn = val - self.sp
+        #    add += "(arg" + str(argn) + ") "
 
         if val == self.sp:
             add += "<-- sp "
@@ -226,6 +233,11 @@ class Debugger:
                     " | sp = ", self.tohex(self.sp), "| argc =", self.tohex(self.args_c))
             for i in range(max(self.ctx-5, 0), self.sp+self.args_c+5):
                 self.print_addr(i)
+
+        if "asm" in cmd:
+            for inst in range(0, len(self.instructions)):
+                self.print_instruction(inst)
+
         if "mem" in cmd:
             s = self.addr(args[0])
             e = s
@@ -243,6 +255,7 @@ class Debugger:
 
         return command == ""
 
+    
     def run(self):
         # Mode d'exécution réel
         if(self.mode == 0):
@@ -252,8 +265,7 @@ class Debugger:
         # Mode debug
         elif(self.mode == 1):
              while(not self.ended and self.ip < len(self.instructions)):
-                print(self.tohex(self.instructions[self.ip][0][:-1]),
-                      ' '.join(self.instructions[self.ip][1:]))
+                self.print_instruction(self.ip)
                 if self.run_active:
                     if self.ip in self.breakpoints:
                         self.run_active = False
@@ -282,7 +294,7 @@ class Debugger:
 s = Debugger(instructions, mode)
 try:
     s.run()
-except:
+except IOError as e:
     sys.exit(1)
 
 sys.exit(s.return_code)

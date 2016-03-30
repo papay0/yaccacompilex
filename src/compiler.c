@@ -238,7 +238,15 @@ void do_func_call(char* name, expression_t* r)
 	istream_printf(".stacksize %d\n", stack_retaddr);
 	istream_printf(".popargs %d\n", parambuffer_size());
 	istream_printf("AFC %d %d\n", stack_retaddr,  get_pc()+2);
-	istream_printf("CALL @%d\n", funcaddr);
+
+	if(stable_isglobal(symbols, name))
+	{
+		istream_printf("CALL @%d\n", funcaddr);
+	}
+	else
+	{
+		istream_printf("CALL %d\n", funcaddr);
+	}
 
 	// Copie de la valeur de retour dans la variable temporaire réservée.
 	istream_printf("COP %d %d\n", stack_tempvar, stack_retval);
@@ -369,6 +377,25 @@ void check_type_affect(type_t* exprtype, type_t* dest)
 	}
 }
 
+void do_affect_dereference(expression_t dst, expression_t src,
+	 expression_t* r, expression_t* offset)
+{
+	if(offset != NULL)
+	{
+		expression_t tmp;
+		do_operation(dst, *offset, &tmp, "MUL");
+		istream_printf("COPB %d %d\n", tmp.address, src.address);
+		r->address = tmp.address;
+		r->type = tmp.type; // FIXME
+	}
+	else
+	{
+		istream_printf("COPB %d %d\n", dst.address, src.address);
+		r->address = dst.type;
+		r->type = dst.type; // FIXME
+	}
+
+}
 void do_affect(char* name, expression_t expr, int op)
 {
 	symbol_t* symbol = stable_find(symbols, name);
