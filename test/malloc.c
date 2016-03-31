@@ -8,9 +8,9 @@ int main()
     free(ptr);
     print(ptr);
     print(ptr2);
-    assert(ptr == 512);
-    assert(ptr2 == 522);
-    assert(ptr3 == 542);
+    assert(ptr == (int*)512);
+    assert(ptr2 == (int*)522);
+    assert(ptr3 == (int*)542);
     print(ptr[0]);
 /*
     int* ptr5 = ptr + 5;
