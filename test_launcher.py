@@ -11,7 +11,8 @@ def endcol():
 mode = 0
 if len(sys.argv)  == 1:
     tests = ["testbench.c", "facto.c", "func.c", "while.c", "ptr.c", "malloc.c", "func_sale.c",
-             "if_1.c", "if_2.c", "while2.c", "while3.c", "complex.c"]
+             "if_1.c", "if_2.c", "while2.c", "while3.c",
+             "if_elsif_else.c", "if_else.c", "if_elsif.c", "if_elsif_elsif.c", "if_elsif_elsif_else.c", "if_else_2.c", "complex.c"]
     for test in tests:
         print("+ Testing", test);
         ret = subprocess.call("bin/parser < test/" + test + " > bin/parser_out", shell=True)

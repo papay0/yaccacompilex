@@ -43,7 +43,7 @@ type_t* type_create_ptr(type_t* type)
 	ptrtype_t* ptr = (ptrtype_t*)malloc(sizeof(ptrtype_t));
 	ptr->type = type;
 	ptr->kind = TYPE_KIND_POINTER;
-	return ((type_t*)ptr);	 
+	return ((type_t*)ptr);
 }
 
 type_t* type_create_primitive(char* name)
@@ -128,7 +128,7 @@ int type_equals(type_t* t1, type_t* t2)
 int type_getoptype(char* opcode)
 {
 	#define ISOP(op) (strcmp(opcode, op) == 0)
-	if(ISOP("ADD") || ISOP("DIV") || 
+	if(ISOP("ADD") || ISOP("DIV") ||
 	   ISOP("MUL") || ISOP("SUB"))
 	{
 		return OPTYPE_ARITHMETICS;
@@ -143,7 +143,7 @@ int type_getoptype(char* opcode)
 	{
 		return OPTYPE_AFFECT;
 	}
-	else if(ISOP("EQ") || ISOP("NEQ")) 
+	else if(ISOP("EQ") || ISOP("NEQ"))
 	{
 		return OPTYPE_EQUALS;
 	}
@@ -154,7 +154,7 @@ int type_getoptype(char* opcode)
 // Retourne vrai si 2 types sont compatibles.
 // 2 types sont compatibles s'ils sont égaux, à l'exception près
 // du type primitif de départ.
-// Si equals vaut vrai, la fonction ne retournera vrai que si les 
+// Si equals vaut vrai, la fonction ne retournera vrai que si les
 // 2 types sont strictements égaux.
 // Exemples :
 // t1     t2    compatible? equals?
@@ -162,7 +162,7 @@ int type_getoptype(char* opcode)
 // int    char  Yes         No
 // int*   char* Yes         No
 // int*   int** No          No
-// int*   int 	Yes			No 
+// int*   int 	Yes			No
 int type_compatible(type_t* t1, type_t* t2, int optype)
 {
 	if(t1->kind == t2->kind)
@@ -193,13 +193,13 @@ int type_compatible(type_t* t1, type_t* t2, int optype)
 		else if(t1->kind == TYPE_KIND_FUNCTION)
 		{
 			// On n'ajoute pas des pointeurs de fonction !!!
-			if(optype == OPTYPE_ARITHMETICS || optype == OPTYPE_LOGIC) 
+			if(optype == OPTYPE_ARITHMETICS || optype == OPTYPE_LOGIC)
 				return 0;
 
 			functype_t* f1 = (functype_t*)t1;
 			functype_t* f2 = (functype_t*)t2;
-			
-			// Dans le cas de equals et afc, ces opérations sont valides 
+
+			// Dans le cas de equals et afc, ces opérations sont valides
 			// si le type fonction est exactement égal !
 			if(!type_compatible(f1->return_type, f2->return_type, OPTYPE_STRICT))
 				return 0;
@@ -242,5 +242,5 @@ int type_compatible(type_t* t1, type_t* t2, int optype)
 
 	}
 	return 0;
-	
+
 }

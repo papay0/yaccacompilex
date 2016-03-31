@@ -218,6 +218,7 @@ void do_func_call(char* name, expression_t* r)
 	{
 		print_warning("the variable %s is not a function and cannot be called.\n", name);
 		
+
 	}
 	
 	// *** Structure de la pile :
@@ -280,6 +281,75 @@ void do_func_call(char* name, expression_t* r)
 
 	// on en a terminé avec le buffer de paramètres actuel.
 	stackbuff_pop(argbuff);
+}
+
+void do_body_for_the_if_else_this_name_is_like_shit_I_know(){
+    int last_index = -1;
+    for (int i = 0; i < labels->index; i++) {
+        if (labels->labels[i] == -1) {
+            last_index = i;
+        }
+    }
+    labels->labels[last_index] = get_pc()+1;
+    ltable_print(labels);
+}
+
+void do_body_for_the_if_elsif_this_name_is_like_shit_I_know(){
+    int last_index = -1;
+    for (int i = 0; i < labels->index; i++) {
+        if (labels->labels[i] == -1) {
+            last_index = i;
+        }
+    }
+    labels->labels[last_index] = get_pc();
+    ltable_print(labels);
+}
+
+void do_body_if_elsif() {
+    do_body_for_the_if_else_this_name_is_like_shit_I_know();
+    istream_printf("JMP %d\n", labels->index);
+    printf("--> do_body_if_elsif : JMP %d\n", labels->index);
+    ltable_add(labels, -1);
+}
+
+void do_body_if_else() {
+    do_body_for_the_if_else_this_name_is_like_shit_I_know();
+    istream_printf("JMP %d\n", labels->index);
+    printf("--> do_body_if_else : JMP %d\n", labels->index);
+    ltable_add(labels, -1);
+}
+
+void do_end_elsif(){
+    int index = do_body_return_index();
+    labels->labels[index] = get_pc();
+}
+
+void do_body_elsif_else(){
+    do_body_for_the_if_else_this_name_is_like_shit_I_know();
+    istream_printf("JMP %d\n", labels->index);
+    printf("--> do_body_if_else : JMP %d\n", labels->index);
+    ltable_add(labels, -1);
+    do_end_elsif();
+}
+
+void do_body_elsif() {
+     int index = do_body_return_index();
+     int get_pc_var = get_pc();
+     printf(">>> do_body_elsif : index = %d, get_pc = %d\n", index, get_pc_var);
+     labels->labels[index] = get_pc_var+1; // pour modifier le JMF du haut
+
+    do_body_for_the_if_elsif_this_name_is_like_shit_I_know(); // pour modifier le JMP du haut
+    istream_printf("JMP %d\n", labels->index);
+    printf("--> do_body_if_elsif : JMP %d\n", labels->index);
+    ltable_add(labels, -1);
+
+}
+
+void do_body_else() {
+    int index = do_body_return_index();
+    int get_pc_var = get_pc();
+    printf(">>> do_body_else : index = %d, get_pc = %d\n", index, get_pc_var);
+    labels->labels[index] = get_pc_var;
 }
 
 
