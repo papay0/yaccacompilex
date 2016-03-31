@@ -55,9 +55,10 @@ void update_label(ltable_t* this){
     //printf("--> %s\n", line);
     if (strcmp(instruction, "JMF") == 0) {
       sscanf(line, "%d: %s %d %d",&line_number, instruction, &arg1, &arg2);
-      //printf("Je dois changer mon label à la ligne %d de mon label table\n", arg2);
+      //ltable_print(this);
+      printf("Je dois changer mon label à la ligne %d de mon label table\n", arg2);
       value_label_tabel = get_value_at_index(this, arg2);
-      //printf("value at index %d is %d\n", arg2, value_label_tabel);
+      printf("value at index %d is %d\n", arg2, value_label_tabel);
       fprintf(fr, "%d: %s %d %d\n",line_number, instruction, arg1, value_label_tabel);
     } else if (strcmp(instruction, "JMP") == 0) {
       sscanf(line, "%d: %s %d",&line_number, instruction, &arg1);

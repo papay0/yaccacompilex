@@ -14,6 +14,7 @@ tCHAR		"char"
 tPrint 		"print"
 tIf 		"if"
 tElse		"else"
+tElseif "else if"
 tWhile 		"while"
 tReturn 	"return"
 tSemi 		";"
@@ -34,6 +35,8 @@ tAnd		"&&"
 tAmpersand	"&"
 tOr			"||"
 tNot		"!"
+tInf    "<"
+tSup    ">"
 tNotEquals 	"!="
 %%
 
@@ -43,6 +46,7 @@ tNotEquals 	"!="
 {tPrint} 		{ p("Print{%s} ", yytext); 	return tPrint; };
 {tIf} 			{ p("If{%s} ", yytext); 	return tIf; };
 {tElse} 			{ p("Else{%s} ", yytext); 	return tElse; };
+{tElseif}     { p("Else if{%s} ", yytext); 	return tElseif; };
 {tWhile} 		{ p("While{%s} ", yytext); 	return tWhile; };
 {tReturn} 		{ p("Return{%s} ", yytext); return tReturn; };
 {tID} 			{
@@ -55,6 +59,8 @@ tNotEquals 	"!="
 {tSemi} 		{ p("Semi{%s} ", yytext); 	return tSemi; };
 {tComa} 		{ p("Coma{%s} ", yytext); 	return tComa; };
 {tEquals}		{ p("Equals{%s} ", yytext);	return tEquals; };
+{tInf}      { p("Inf{%s} ", yytext);	return tInf; };
+{tSup}      { p("Sup{%s} ", yytext);	return tSup; };
 {tNotEquals} 	{ p("Not Equals{%s} ", yytext);	return tNotEquals; };
 {tAffect} 		{ p("Affect{%s} ", yytext); 	return tAffect; };
 {tNot}			{ p("Not{%s} ", yytext);	return tNot; };

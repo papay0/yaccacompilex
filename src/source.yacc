@@ -1,6 +1,6 @@
 %token tINT tCHAR
-%token tAnd tOr tEquals tNotEquals tNot
-%token tPrint tIf tElse tWhile tReturn
+%token tAnd tOr tEquals tNotEquals tNot tInf tSup
+%token tPrint tIf tElse tElseif tWhile tReturn
 %token tSemi tComa tAffect tPlus tMinus tMult tDiv tAmpersand
 %token tPO tPC tAO tAC tCO tCC
 %token <number> tNumber
@@ -92,8 +92,16 @@ IVarAff         :       Affect tSemi;
 Cond_if         :       Expr {do_if($1);} ;
 Cond_while      :       Expr {do_while($1);};
 If              :       tIf tPO Cond_if tPC Body { do_body(); }
-                        | tIf tPO Cond_if tPC Body Else;
-Else            :       tElse Body;
+                        | tIf tPO Cond_if tPC Body_if_else Else
+                        | tIf tPO Cond_if tPC Body_if_elsif Elseif;
+Elseif          :       tElseif tPO Cond_if tPC Body_elsif {do_end_elsif();}
+                        | tElseif tPO Cond_if tPC Body_elsif Elseif
+                        | tElseif tPO Cond_if tPC Body_elsif Else;
+Else            :       tElse Body {do_body_else();};
+Body_if_else    :       Body {do_body_if_else();};
+Body_if_elsif   :       Body {do_body_if_elsif();}
+Body_elsif      :       Body {do_body_elsif();};
+Body_elsif_else :       Body {do_body_elsif_else();}
 While           :       tWhile POWhile Cond_while PCWhile Body {do_body_while($3);};
 Return          :       tReturn Expr tSemi;
 Print           :       tPrint tPO Expr tPC tSemi;
@@ -108,6 +116,8 @@ Expr            :       Affect
                         | Expr tNotEquals Expr  { do_operation($1, $3, &$$, "NEQ"); }
                         | Expr tAnd Expr        { do_operation($1, $3, &$$, "AND"); }
                         | Expr tOr Expr         { do_operation($1, $3, &$$, "OR"); }
+                        | Expr tInf Expr         { do_operation($1, $3, &$$, "INF"); }
+                        | Expr tSup Expr         { do_operation($1, $3, &$$, "SUP"); }
                         | Expr tPlus Expr       { do_operation($1, $3, &$$, "ADD"); }
                         | Expr tMinus Expr      { do_operation($1, $3, &$$, "SUB"); }
                         | Expr tMult Expr       { do_operation($1, $3, &$$, "MUL"); }
