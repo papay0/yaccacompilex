@@ -133,7 +133,8 @@ int type_getoptype(char* opcode)
 	{
 		return OPTYPE_ARITHMETICS;
 	}
-	else if(ISOP("AND") || ISOP("OR"))
+	else if(ISOP("AND") || ISOP("OR") 
+			|| ISOP("SUP") || ISOP("INF"))
 	{
 		return OPTYPE_LOGIC;
 	}
@@ -185,7 +186,8 @@ int type_compatible(type_t* t1, type_t* t2, int optype)
 
 			// Operations autorisées entre pointeurs et pointeurs : égalité et affectation.
 			// Sous condition d'égalité stricte.
-			if(optype == OPTYPE_STRICT || optype == OPTYPE_EQUALS || optype== OPTYPE_AFFECT)
+			if(optype == OPTYPE_STRICT || optype == OPTYPE_EQUALS 
+			|| optype== OPTYPE_AFFECT || optype == OPTYPE_ARITHMETICS || optype == OPTYPE_LOGIC)
 				return type_compatible(ptr1->type, ptr2->type, OPTYPE_STRICT);
 		}
 		else if(t1->kind == TYPE_KIND_FUNCTION)

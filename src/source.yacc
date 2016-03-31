@@ -128,7 +128,9 @@ Print           :       tPrint tPO Expr tPC tSemi { do_print($3); }
 			| tPrint tPO tID tComa Expr tPC tSemi { do_dprint($3, $5); };
 
 Affect          :       tID tAffect Expr { do_affect($1, $3, &$$, DOAFFECT_NONE); }
-			| tMult tID tAffect Expr { do_affect($2, $4, &$$, DOAFFECT_DEREFERENCE); };
+			| tMult tID tAffect Expr { do_affect($2, $4, &$$, DOAFFECT_DEREFERENCE); }
+			| tMult Expr tAffect Expr { do_affect_dereference($2, $4, &$$, NULL); }
+			| Expr tCO Expr tCC tAffect Expr{ do_affect_dereference($1, $6, &$$, $3); };
 
 Expr            :       tPO Expr tPC          { $$ = $2;}
                         | Expr tCO Expr tCC     { do_indexing($1, $3, &$$); }

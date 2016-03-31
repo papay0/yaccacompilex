@@ -80,7 +80,6 @@ int do_operation(expression_t e1, expression_t e2,
 	istream_printf("%s %d %d %d\n", opname, newaddr, addr1, addr2);
 	r->address = newaddr;
 
-	// TODO : type check
 	if(!type_compatible(e1.type, e2.type, type_getoptype(opname)))
 	{
 		print_warning("incompatible-pointer-types\n");
@@ -404,10 +403,11 @@ void do_affect_dereference(expression_t dst, expression_t src,
 	if(offset != NULL)
 	{
 		expression_t tmp;
-		do_operation(dst, *offset, &tmp, "MUL");
+		do_operation(dst, *offset, &tmp, "ADD");
 		istream_printf("COPB %d %d\n", tmp.address, src.address);
 		r->address = tmp.address;
 		r->type = tmp.type; // FIXME
+
 	}
 	else
 	{
@@ -563,11 +563,12 @@ void do_func_implementation(char* name)
 void do_array_declaration(type_t* type, char* name, int size)
 {
 	type_t* arrtype = type_create_ptr(type);
-	stable_add(symbols, name, arrtype);
-	for(int j = 1; j < size; j++)
+	symbol_t* symbol = stable_add(symbols, name, arrtype);
+	for(int j = 0; j < size; j++)
 	{
 		stable_add(symbols, "<array>", arrtype);
 	}
+	istream_printf("PTR %d %d\n", symbol->address, symbol->address+1);
 }
 
 type_t* do_makefunctype(type_t* return_type)

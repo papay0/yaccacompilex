@@ -59,6 +59,12 @@ class Debugger:
         to, o1, o2 = params
         self.memory[self.addr(to)] = self.memory[self.addr(o1)] - self.memory[self.addr(o2)]
 
+    def op_and(self, line, params):
+        to, o1, o2 = params
+        v1 = self.memory[self.addr(o1)]
+        v2 = self.memory[self.addr(o2)]
+        self.memory[self.addr(to)] = 1 if (v1 == True) and (v2 == True) else 0;
+
     
     def op_mul(self, line, params):
         to, o1, o2 = params

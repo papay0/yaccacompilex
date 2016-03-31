@@ -8,7 +8,9 @@ Arthur :
 
 Jojo :
 - cannot derefence void, cannot affect void, cannot do anything with void
-
+- gestion des types INF, SUP => int
+- SIZEOF
+- Struct
 
 SOUTENANCE :
 	- un rapport avec ce qu'on a dev, comment on a fait, points difficiles / résolus...

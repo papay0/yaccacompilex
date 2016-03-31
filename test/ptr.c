@@ -27,6 +27,12 @@ int main()
     // value[1] = 4;
     int* c = value + 1;
     *c = 50;
+    *(value+2) = 51;
+    value[3] = 52;
+    
     assert(value[1] == 50);
     assert(*(value+1) == 50);
+    assert(value[2] == 51);
+    assert(value[3] == 52);
+
 }
