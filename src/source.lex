@@ -4,6 +4,7 @@
 #include "y.tab.h"
 #include <stdio.h>
 int getMode();
+void consume_comment();
 #define p(x, s) if(getMode() == 0) printf(x, s)
 
 %}
