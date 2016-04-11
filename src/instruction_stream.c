@@ -6,11 +6,17 @@
 static FILE * fp;
 FILE * fr;
 static int pc = 0;
+char* outfile;
+char* tempfile;
 
-
-void istream_open() {
-  fp = fopen ("bin/tmp_yaccacompilex", "w+");
-  //fr = fopen ("bin/yaccacompilex", "w+");
+void istream_open(char* outf) {
+  // fichier temporaire
+  tempfile = malloc(strlen(outf)+5);
+  strcpy(tempfile, outf);
+  tempfile = strcat(tempfile, ".tmp");
+  // fichier principal
+  outfile = outf;
+  fp = fopen (tempfile, "w+");
 }
 
 void istream_printf(char* format, ... ) {
@@ -37,8 +43,8 @@ void istream_printf(char* format, ... ) {
 void update_label(ltable_t* this){
   //printf("I start updating the label\n");
   //FILE *fr;
-  fp = fopen ("bin/tmp_yaccacompilex", "r");
-  fr = fopen ("bin/yaccacompilex", "w");
+  fp = fopen (tempfile, "r");
+  fr = fopen (outfile, "w");
   char line[256];
   //fr = fopen ("bin/tmp_yaccacompilex", "r");
   char instruction[256], else_instr[256];

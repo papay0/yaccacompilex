@@ -43,9 +43,10 @@ int check_null(symbol_t** symbol, char* name)
 }
 
 
-void ctx_init()
+void ctx_init(char* outfile)
 {
 	ctx.verbose = 0;
+	ctx.outfile = outfile;
 	tempaddr_init();
 	symbols = stable_new();
 	labels = ltable_new();
@@ -53,7 +54,7 @@ void ctx_init()
 	functypebuff = stackbuff_new();
 	vardeclbuff = stackbuff_new();
 	argbuff = stackbuff_new();
-	istream_open();
+	istream_open(outfile);
 	istream_printf(".area start\n");
 }
 
@@ -66,7 +67,7 @@ void ctx_close()
 		stable_print(symbols);
 		ltable_print(labels);
 	}
-	printf("Code written to bin/yaccacompilex !\n");
+	printf("Code written to %s !\n", ctx.outfile);
 }
 
 int do_operation(expression_t e1, expression_t e2,

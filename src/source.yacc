@@ -35,9 +35,15 @@
 
 %{
         #include <stdio.h>
+	#include <ctype.h>
+	#include <stdlib.h>
+	#include <getopt.h>
         #include "compiler.h"
         #include "ltable.h"
         void yyerror(char const * errorText);
+	int yylex();
+	int yyparse();
+	FILE* yyin;
 %}
 
 %union
@@ -213,14 +219,46 @@ int getMode();
 
 int main(int argc, char** argv)
 {
-  	//ltable_t* labels_global;
-	// test_stable(); return 0;
+	char* output = "bin/yaccacompilex";
+
+	// Parsing des arguments
+	int c;
+	while ((c = getopt (argc, argv, "o:")) != -1)
+	switch (c)
+	{
+		case 'o':
+			output = optarg;	
+			break;
+	     	case '?':
+			if (optopt == 'o')
+		  		fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+			else if (isprint (optopt))
+		  		fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+			else
+		  		fprintf (stderr,
+			   		"Unknown option character `\\x%x'.\n",
+			   		optopt);
+			return 1;
+		default:
+			abort ();
+	}
+
+	char* input = argv[optind];
+
+	
+	// Selection de l'entrée.
+	if(input != NULL)
+	{
+		FILE* f = fopen(input, "r");
+		stdin = f;
+	}
+
 	if(getMode() == 0)
 		while(1) { yylex(); }
 
 	if(getMode() == 1)
 	{
-		ctx_init();
+		ctx_init(output);
 		yyparse();
 		ctx_close();
 		update_label(labels);
