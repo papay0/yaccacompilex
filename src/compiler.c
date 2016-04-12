@@ -594,7 +594,7 @@ void do_func_declaration(char* name, type_t* return_type)
 	type_t* functype = type_create_func(return_type, args, size);
 	stable_add(symbols, name, functype);	
 	stable_setflags(symbols, name, SYMBOL_FUNC);
-	istream_printf(".function %s\n", name);
+	istream_printf(".function %s %d\n", name, size);
 }
 
 void do_func_implementation(char* name)

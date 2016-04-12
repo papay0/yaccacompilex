@@ -9,12 +9,14 @@ def col(n):
 
 def endcol():
     return "\033[0m"
+def col2(s, n):
+    return col(n) + s + endcol()
 
 
 STATUS_OK = 0
 STATUS_ASSERT_FAILED = 1
 MemSeg = collections.namedtuple('MemSeg', 'addr size')
-
+Func = collections.namedtuple('Func', 'argc')
 class Debugger:
     
     def __init__(self, instructions, mode=0):
@@ -24,6 +26,8 @@ class Debugger:
         self.ip = 0
         self.mode = mode
         self.instructions = instructions;
+        self.areas = self.parse_areas(instructions)
+        self.functions = self.parse_functions(instructions)
         self.memory = [0 for i in range(0, self.mem_size)]
         self.dynamic_allocs = [] # tuples (addr, size)
         self.args_c = 0
@@ -37,6 +41,34 @@ class Debugger:
         self.breakpoints = []
         self.localvars = [dict()]
         self.area = ""
+
+    def parse_functions(self, instructions):
+        """Associe à chaque fonction certaines métadonnées"""
+        functions = dict()
+        current = "<unknown>"
+        for instruction in instructions:
+            name, line, params = instruction[1], instruction[0], instruction[2:]
+            
+            if(name == ".function"):
+                functions[params[0]] = Func(int(params[1]))
+
+        return functions
+
+    def parse_areas(self, instructions):
+        """Associe à chaque instruction sa zone de code"""
+        areas = []
+        current = "<unknown>"
+        for instruction in instructions:
+            name, line, params = instruction[1], instruction[0], instruction[2:]
+            
+            if(name == ".area"):
+                current = params[0]
+            elif(name == ".function"):
+                current = params[0]
+    
+            areas.append(current)
+
+        return areas
 
     def tohex(self, v):
         return format(int(v), "02") 
@@ -141,6 +173,34 @@ class Debugger:
     def op_pri(self, line, params):
         val = params[0]
         print("\033[0;34mprint: ", self.memory[self.addr(val)], "\033[0m")
+
+    def get_args(self, ctx, ip):
+        args = []
+        area = self.areas[ip]
+        if area in self.functions.keys():
+            argc = self.functions[area].argc
+            argn = 0
+            for i in range(ctx-argc-2, ctx-2):
+                args.append("arg" + str(argn) + "=" + str(self.memory[i]))
+                argn += 1
+        return args
+
+    def format_trace(self, ip, args, ctx, sp):
+            return col2(self.tohex(ip), 34) + " in " + col2(self.areas[ip], 35) + "(" + ", ".join(args) + ")" + col2(" ctx = " + str(ctx) + ", sp = " + str(sp), 32)
+
+    def print_backtrace(self):
+        ctx = self.ctx
+        print(self.format_trace(self.ip, self.get_args(self.ctx, self.ip), self.ctx, self.sp) + " : ") 
+        while(ctx != 0):
+            ip = self.memory[ctx-2]
+            sp = self.memory[ctx-1]
+            ctx = self.memory[ctx]
+            area = self.areas[ip]
+            
+            args = self.get_args(ctx, ip); 
+            print("\tfrom " + self.format_trace(ip, args, ctx, sp));
+
+
     
     def op_ret(self, line, params):
         # On positionne le pointeur d'instruction
@@ -225,14 +285,12 @@ class Debugger:
     def macro_local(self, line, params):
         address = self.ctx + int(params[0])
         name = params[1]
-        # self.sp = self.sp + 1
         self.localvars[-1][address] = name
 
     def macro_array(self, line, params):
         name = params[0]
         address = self.ctx + int(params[1])
         size = int(params[2])
-        # self.sp = self.sp + 1
         self.localvars[-1][address] = name
         for i in range(0, size):
             self.localvars[-1][i+address+1] = name + "[" + str(i) + "]";
@@ -265,15 +323,10 @@ class Debugger:
             add += "(sp) "
         if val == self.ctx - 2:
             add += "(@) "
-       
+
         if val in self.localvars[-1].keys():
             add += "(" + self.localvars[-1][val] + ") "
-
         
-        #if val > self.sp and val <= self.sp + self.args_c:
-        #    argn = val - self.sp
-        #    add += "(arg" + str(argn) + ") "
-
         if val == self.sp:
             add += "<-- sp "
 
@@ -285,22 +338,25 @@ class Debugger:
         cmds = command.split(' ')
         cmd, args = cmds[0], cmds[1:]
         
-        if "ctx" in cmd: print("ctx = ", self.tohex(self.ctx))
-        if "sp" in cmd: print("sp = ", self.tohex(self.sp))
-        if "frame" in cmd:
+        if "ctx" == cmd: print("ctx = ", self.tohex(self.ctx))
+        if "sp" == cmd: print("sp = ", self.tohex(self.sp))
+        if "frame" == cmd:
             print("[in function", self.area + "]:", "ctx =", self.tohex(self.ctx),
                     " | sp = ", self.tohex(self.sp), "| argc =", self.tohex(self.args_c))
             for i in range(max(self.ctx-5, 0), self.sp+self.args_c+5):
                 self.print_addr(i)
 
-        if "asm" in cmd:
+        if "asm" == cmd:
             for inst in range(0, len(self.instructions)):
                 self.print_instruction(inst)
 
-        if "source" in cmd:
+        if "source" == cmd:
             print(self.source)
+        
+        if "backtrace" == cmd:
+            self.print_backtrace();
 
-        if "mem" in cmd:
+        if "mem" == cmd:
             s = self.addr(args[0])
             e = s
             if len(args) == 2:
@@ -308,10 +364,10 @@ class Debugger:
             for i in range(s, e+1):
                 self.print_addr(i)
 
-        if "run" in cmd:
+        if "run" == cmd:
             self.run_active = True
             return True
-        if "b" in cmd:
+        if "b" == cmd:
             self.breakpoints.append(int(cmds[1]))
           
 
