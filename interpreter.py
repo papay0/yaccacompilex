@@ -327,6 +327,14 @@ class Debugger:
         if val in self.localvars[-1].keys():
             add += "(" + self.localvars[-1][val] + ") "
         
+        area = self.areas[self.ip]
+        if area in self.functions.keys():
+            argc = self.functions[area].argc
+            for i in range(0, argc):
+                addr = self.ctx-2-argc+i
+                if val == addr:
+                    add += "(arg" + str(i) + ") "
+        
         if val == self.sp:
             add += "<-- sp "
 
