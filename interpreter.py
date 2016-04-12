@@ -18,8 +18,9 @@ MemSeg = collections.namedtuple('MemSeg', 'addr size')
 class Debugger:
     
     def __init__(self, instructions, mode=0):
-        self.mem_size = 1024;
-        self.stack_size = 512;
+        self.source = ""
+        self.mem_size = 1024
+        self.stack_size = 512
         self.ip = 0
         self.mode = mode
         self.instructions = instructions;
@@ -222,8 +223,20 @@ class Debugger:
         self.area = params[0]
 
     def macro_local(self, line, params):
-        self.sp = self.sp + 1
-        self.localvars[-1][self.sp] = params[0]
+        address = self.ctx + int(params[0])
+        name = params[1]
+        # self.sp = self.sp + 1
+        self.localvars[-1][address] = name
+
+    def macro_array(self, line, params):
+        name = params[0]
+        address = self.ctx + int(params[1])
+        size = int(params[2])
+        # self.sp = self.sp + 1
+        self.localvars[-1][address] = name
+        for i in range(0, size):
+            self.localvars[-1][i+address+1] = name + "[" + str(i) + "]";
+
 
     def macro_stacksize(self, line, params):
         self.sp = self.ctx + int(params[0])
@@ -236,6 +249,13 @@ class Debugger:
 
     def macro_ra(self, line, params):
         pass
+
+    def macro_file(self, line, params):
+        name = params[0]
+        f = open(name, 'r');
+        self.source = "".join([line for line in f])
+        f.close()
+
 
     def print_addr(self, val):
         add = "\t" + col(32)
@@ -276,6 +296,9 @@ class Debugger:
         if "asm" in cmd:
             for inst in range(0, len(self.instructions)):
                 self.print_instruction(inst)
+
+        if "source" in cmd:
+            print(self.source)
 
         if "mem" in cmd:
             s = self.addr(args[0])

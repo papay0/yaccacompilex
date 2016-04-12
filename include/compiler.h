@@ -19,7 +19,7 @@ typedef struct context {
 } context_t;
 
 
-void ctx_init(char* outfile);
+void ctx_init(char* infile, char* outfile);
 void ctx_close();
 // Génère le code l'operation donnée par opname ("ADD", "MULT", etc...) sur les expressions
 // e1 et e2, et met le résultat dans l'expression r.

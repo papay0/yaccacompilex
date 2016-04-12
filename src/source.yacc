@@ -265,7 +265,7 @@ int main(int argc, char** argv)
 
 	if(getMode() == 1)
 	{
-		ctx_init(output);
+		ctx_init(input, output);
 		yyparse();
 		ctx_close();
 		update_label(labels);

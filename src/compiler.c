@@ -43,7 +43,7 @@ int check_null(symbol_t** symbol, char* name)
 }
 
 
-void ctx_init(char* outfile)
+void ctx_init(char* infile, char* outfile)
 {
 	ctx.verbose = 0;
 	ctx.outfile = outfile;
@@ -55,6 +55,8 @@ void ctx_init(char* outfile)
 	vardeclbuff = stackbuff_new();
 	argbuff = stackbuff_new();
 	istream_open(outfile);
+	if(infile != NULL)
+		istream_printf(".file %s\n", infile);
 	istream_printf(".area start\n");
 }
 
@@ -553,8 +555,9 @@ void do_variable_declarations(type_t* type)
 {
 	for(int i = 0; i < stackbuff_size(vardeclbuff); i++)
 	{
-		stable_add(symbols, (char*)stackbuff_get(vardeclbuff, i), type);
-		istream_printf(".local %s\n", stackbuff_get(vardeclbuff, i));
+		char* symbol_name = stackbuff_get(vardeclbuff, i);
+		symbol_t* symbol =  stable_add(symbols, (char*)symbol_name, type);
+		istream_printf(".local %d %s\n", symbol->address, symbol_name);
 	}
 }
 
@@ -639,6 +642,7 @@ void do_array_declaration(type_t* type, char* name, int size)
 	{
 		stable_add(symbols, "<array>", arrtype);
 	}
+	istream_printf(".array %s %d %d\n", symbol->name, symbol->address, size);
 	istream_printf("PTR %d %d\n", symbol->address, symbol->address+1);
 }
 
