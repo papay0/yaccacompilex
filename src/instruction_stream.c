@@ -9,6 +9,18 @@ static int pc = 0;
 char* outfile;
 char* tempfile;
 
+FILE* secure_open(char* filename, const char* mode)
+{
+    FILE* f = fopen(filename, mode);
+    if(f == NULL)
+    {
+        fprintf(stderr, "\033[31;1mfatal error\033[0m : failed to open file %s : ", filename);
+        perror("");
+        exit(1);
+    }
+    return f;
+} 
+
 void istream_open(char* outf) {
   // fichier temporaire
   tempfile = malloc(strlen(outf)+5);
@@ -16,7 +28,7 @@ void istream_open(char* outf) {
   tempfile = strcat(tempfile, ".tmp");
   // fichier principal
   outfile = outf;
-  fp = fopen (tempfile, "w+");
+  fp = secure_open (tempfile, "w+");
 }
 
 void istream_printf(char* format, ... ) {
@@ -43,8 +55,8 @@ void istream_printf(char* format, ... ) {
 void update_label(ltable_t* this){
   //printf("I start updating the label\n");
   //FILE *fr;
-  fp = fopen (tempfile, "r");
-  fr = fopen (outfile, "w");
+  fp = secure_open (tempfile, "r");
+  fr = secure_open (outfile, "w");
   char line[256];
   //fr = fopen ("bin/tmp_yaccacompilex", "r");
   char instruction[256], else_instr[256];

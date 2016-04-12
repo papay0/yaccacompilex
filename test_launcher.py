@@ -17,13 +17,14 @@ if len(sys.argv)  == 1:
     error_count = 0
     for test in tests:
         print("+ Testing", test);
-        ret = subprocess.call("bin/parser < test/" + test + " > bin/parser_out", shell=True)
+        outfile = "build/" + test + ".asm";
+        ret = subprocess.call("bin/parser test/" + test + " > /dev/null -o " + outfile, shell=True)
         if ret != 0:
             print("\t..." + col(31) + test + ": Compilation FAILED" + endcol())
             error_count += 1
             continue
 
-        ret = subprocess.call("python3 interpreter.py bin/yaccacompilex 0 > bin/interp_out", shell=True)
+        ret = subprocess.call("python3 interpreter.py " + outfile + " 0 > /dev/null", shell=True)
         if ret == 0:
             print("\t... " + col(32) + test + ": OK" + endcol())
             success_count += 1
@@ -39,8 +40,12 @@ if len(sys.argv)  == 1:
 
 elif len(sys.argv)  >= 2:
     test = sys.argv[1]
-    mode = "1" if len(sys.argv) == "2" else sys.argv[2]
-    subprocess.call("bin/parser < " + test + " > bin/parser_out" + "&& python3 interpreter.py bin/yaccacompilex " + mode, shell=True)
+    mode = "1" if len(sys.argv) == 2 else sys.argv[2]
+    outfile = test + ".asm"
+
+    command = "bin/parser " + test +" -o " + outfile + " > /dev/null " + "&& python3 interpreter.py " + outfile + " " + mode;
+    print(command);
+    subprocess.call(command, shell=True)
 
 
 

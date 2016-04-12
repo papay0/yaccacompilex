@@ -250,6 +250,13 @@ int main(int argc, char** argv)
 	if(input != NULL)
 	{
 		FILE* f = fopen(input, "r");
+		if(f == NULL)
+		{
+			fprintf(stderr, "\033[31;1mfatal error\033[0m : failed to open file %s : ", input);
+        		perror("");
+
+			exit(1);
+		}
 		stdin = f;
 	}
 
