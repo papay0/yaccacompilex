@@ -12,24 +12,27 @@ mode = 0
 if len(sys.argv)  == 1:
     tests = ["testbench.c", "facto.c", "func.c", "while.c", "ptr.c", "malloc.c", "func_sale.c",
              "if_1.c", "if_2.c", "while2.c", "while3.c", 
-             "if_elsif_else.c", "if_else.c", "if_elsif.c", "if_elsif_elsif.c", "if_elsif_elsif_else.c", "if_else_2.c", "complex.c"]
+             "if_elsif_else.c", "if_else.c", "if_elsif.c", "if_elsif_elsif.c", "if_elsif_elsif_else.c", "if_else_2.c", "complex.c",
+             "errors.c", "syntexerr.c", "assertfalse.c"]
     success_count = 0
     error_count = 0
     for test in tests:
-        print("+ Testing", test);
+        print(col(4) + "+ Testing " + test + endcol());
         outfile = "build/" + test + ".asm";
         ret = subprocess.call("bin/parser test/" + test + " > /dev/null -o " + outfile, shell=True)
         if ret != 0:
             print("\t..." + col(31) + test + ": Compilation FAILED" + endcol())
             error_count += 1
             continue
+        print("\t... " + col(32) + test + ": Compilation SUCCESSFUL" + endcol())
 
         ret = subprocess.call("python3 interpreter.py " + outfile + " 0 > /dev/null", shell=True)
         if ret == 0:
-            print("\t... " + col(32) + test + ": OK" + endcol())
+            print("\t... " + col(32) + test + ": ASSERTIONS OK" + endcol())
             success_count += 1
         else:
-            print("\t... " + col(31) + test + ": FAILED" + endcol())
+            msg = "ASSERTIONS FAILED" if ret == 1 else "EXECUTION FAILED"
+            print("\t... " + col(31) + test + ": " + msg + endcol())
             error_count += 1
 
     print("================================================")

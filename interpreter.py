@@ -19,6 +19,7 @@ def col2(s, n):
 
 
 STATUS_OK = 0
+STATUS_BAD_CODE = 2
 STATUS_ASSERT_FAILED = 1
 MemSeg = collections.namedtuple('MemSeg', 'addr size')
 Func = collections.namedtuple('Func', 'argc')
@@ -41,7 +42,7 @@ class Debugger:
         self.members = dict()
         self.members.update(inspect.getmembers(self, predicate=inspect.ismethod))
         self.ended = False
-        self.return_code = STATUS_OK
+        self.return_code = STATUS_BAD_CODE
         self.run_active = False
         self.breakpoints = []
         self.localvars = [dict()]
@@ -222,6 +223,7 @@ class Debugger:
 
         if(self.ip == -1):
             self.ended = True
+            self.return_code = STATUS_OK
             print("program terminated.")
 
         # On pop les variables locales [debug]

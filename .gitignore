@@ -1,5 +1,7 @@
 *.o
 *.swp
+*.asm
+*.tmp
 bin/*
 include/y.tab.h
 build/*
