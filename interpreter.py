@@ -3,6 +3,11 @@ import collections
 from optparse import OptionParser
 import inspect
 
+try:
+    import readline
+except:
+    pass 
+
 
 def col(n):
     return "\033[0;" + str(n) + "m"
@@ -74,8 +79,11 @@ class Debugger:
         return format(int(v), "02") 
         
     def print_instruction(self, i):
-        print(self.tohex(self.instructions[i][0][:-1]),
-                      ' '.join(self.instructions[i][1:]))
+        print(self.instruction_to_str(i))
+
+    def instruction_to_str(self, i):
+        return self.tohex(self.instructions[i][0][:-1]) + " " +  ' '.join(self.instructions[i][1:])
+
 
     def addr(self, v):
         if(v.startswith('@')):
@@ -347,24 +355,24 @@ class Debugger:
         cmd, args = cmds[0], cmds[1:]
         
         if "ctx" == cmd: print("ctx = ", self.tohex(self.ctx))
-        if "sp" == cmd: print("sp = ", self.tohex(self.sp))
-        if "frame" == cmd:
+        elif "sp" == cmd: print("sp = ", self.tohex(self.sp))
+        elif "frame" == cmd:
             print("[in function", self.area + "]:", "ctx =", self.tohex(self.ctx),
                     " | sp = ", self.tohex(self.sp), "| argc =", self.tohex(self.args_c))
             for i in range(max(self.ctx-5, 0), self.sp+self.args_c+5):
                 self.print_addr(i)
 
-        if "asm" == cmd:
+        elif "asm" == cmd:
             for inst in range(0, len(self.instructions)):
                 self.print_instruction(inst)
 
-        if "source" == cmd:
+        elif "source" == cmd:
             print(self.source)
         
-        if "backtrace" == cmd:
+        elif "backtrace" == cmd:
             self.print_backtrace();
 
-        if "mem" == cmd:
+        elif "mem" == cmd:
             s = self.addr(args[0])
             e = s
             if len(args) == 2:
@@ -372,13 +380,37 @@ class Debugger:
             for i in range(s, e+1):
                 self.print_addr(i)
 
-        if "run" == cmd:
+        elif "run" == cmd:
             self.run_active = True
             return True
-        if "b" == cmd:
-            self.breakpoints.append(int(cmds[1]))
-          
+        elif "b" == cmd:
+            line = int(cmds[1])
+            if line < 0 or line >= len(self.instructions):
+                print(col(31) + "error :" + endcol() + " no instruction at line " + str(line) + ".")  
+            elif line in self.breakpoints:
+                print("Removed break point at instruction : " + str(line))
+                print(col(31) + "_ " + self.instruction_to_str(line) + endcol())
+                self.breakpoints.remove(line)
+            else:
+                print("Added break point at instruction : " + str(line))
+                print(col(32) + "b " + self.instruction_to_str(line) + endcol())
 
+                self.breakpoints.append(int(cmds[1]))
+            
+        elif "help" == cmd:
+            print("Commands : ")
+            print("asm          : show assembly code")
+            print("source       : show c source code")
+            print("ctx          : show ctx value")
+            print("sp           : show stack pointer value")
+            print("frame        : show current frame")
+            print("backtrace    : show the backtrace")
+            print("mem s        : show the content of the memory at address s")
+            print("mem s e      : show the content of the memory from s to e")
+            print("Addressing modes : \n\t@xxx : address in memory\n\txxx : address in memory starting at current context")
+              
+        elif len(cmd.strip()) != 0:
+            print(col(31) + "Error :" + endcol() + " unrecognized command '" + cmd + "'")
         return command == ""
 
     
