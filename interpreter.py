@@ -249,8 +249,6 @@ class Debugger:
         
         # On push les variables locales [debug]
         self.localvars.append(dict())
-        #for i in range(0, self.args_c):
-        #    self.localvars[-1][self.ctx - 2 - self.args_c + i] = "(arg" + str(i) + ")"
 
     def op_fre(self, line, params):
         addr = self.memory[self.addr(params[0])]
