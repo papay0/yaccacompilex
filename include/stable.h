@@ -83,6 +83,10 @@ void stable_block_exit();
 // Signale à la table des symboles la sortie d'un block, 
 // sans supprimer les variables de la profondeur précédente.
 void stable_block_exit_dirtyhack();
+// Affiche un warning pour chaque référence indéfinie.
+void stable_warn_undefined_references(stable_t* this);
+
+
 
 /* ----------------------------------------------------------------------------
  * TEMPADDR

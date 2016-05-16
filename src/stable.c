@@ -118,7 +118,7 @@ symbol_t* stable_add(stable_t* this, char* name, type_t* type)
 		{
 			if(stable_hasflag(this, name, SYMBOL_INITIALIZED))
 			{
-				print_warning("Redefinition de la fonction %s\n", name);
+				print_warning("Redefinition of %s. This implementation will be ignored.\n", name);
 				return sameSymbol;
 			}
 			else
@@ -126,11 +126,11 @@ symbol_t* stable_add(stable_t* this, char* name, type_t* type)
 				// Implémentation de la fonction => vérification du prototype
 				if(!type_equals(type, sameSymbol->type))
 				{
-					print_warning("Le prototype de la fonction %s ne correspond pas à son implémentation.\n", name);
-					print_wnotes("note: type prototype=\"");
-					type_print(sameSymbol->type);
-					print_wnotes("\", type implémentation=\"");
-					type_print(type);
+					print_warning("Conflicting types for function %s\n", name);
+					print_wnotes("\tnote: first defined with type=\"");
+					type_sprint(print_wnotes, sameSymbol->type);
+					print_wnotes("\", then with type=\"");
+					type_sprint(print_wnotes, type);
 					print_wnotes("\".\n");
 				}	
 				return sameSymbol;
@@ -140,7 +140,7 @@ symbol_t* stable_add(stable_t* this, char* name, type_t* type)
 
 	if (sameSymbol != NULL && sameSymbol->depth == depth && (strcmp(name, "<array>") != 0))
 	{
-		print_warning("Variable %s existe deja dans la même portée.\n", name);
+		print_warning("The variable %s already exists in the same scope.\n", name);
 	}
 
 	// On calcule l'adresse du symbole
@@ -182,6 +182,23 @@ symbol_t* stable_find(stable_t* this, char* name)
 		current = current->next;
 	}
 	// printf("[stable_find] warning: symbol %s not found\n", name);
+	return result;
+}
+
+void stable_warn_undefined_references(stable_t* this)
+{
+	symbol_t* current = this->first;
+	symbol_t* result = NULL;
+	while(current != NULL)
+	{
+        if(stable_hasflag(this, current->name, SYMBOL_FUNC) &
+           !stable_hasflag(this, current->name, SYMBOL_INITIALIZED))
+        {
+            print_warning("undefined reference to %s\n", current->name);
+            print_wnotes("\tnote: function %s has not been implemented\n", current->name);
+        }
+		current = current->next;
+	}
 	return result;
 }
 

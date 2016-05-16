@@ -69,7 +69,10 @@ void ctx_close()
 		stable_print(symbols);
 		ltable_print(labels);
 	}
-	printf("Code written to %s !\n", ctx.outfile);
+    // Verification de l'implémentation de toutes les fonctions
+    stable_warn_undefined_references(symbols);
+	
+    printf("Code written to %s !\n", ctx.outfile);
 }
 
 int do_operation(expression_t e1, expression_t e2,
