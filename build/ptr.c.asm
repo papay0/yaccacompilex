@@ -1,0 +1,112 @@
+0: .file test/ptr.c
+1: .area start
+2: .local 0 global
+3: AFC 1 5
+4: COP @0 1
+5: JMP 108
+6: .function swap 2
+7: .local 1 tmp
+8: COP 2 -4
+9: COPA 2 2
+10: COP 1 2
+11: COP 2 -3
+12: COPA 2 2
+13: COPB -4 2
+14: COP 3 1
+15: COPB -3 3
+16: AFC 4 0
+17: COP 1 4
+18: RET
+19: RET
+20: .function main 0
+21: .local 1 a
+22: AFC 2 5
+23: COP 1 2
+24: .local 2 b
+25: AFC 3 10
+26: COP 2 3
+27: PTR 3 1
+28: .pusharg
+29: PTR 4 2
+30: .pusharg
+31: .stacksize 5
+32: .popargs 2
+33: AFC 5 35
+34: CALL @1
+35: COP 3 8
+36: COP 3 1
+37: AFC 4 10
+38: EQ 3 3 4
+39: ASRT 3
+40: COP 3 2
+41: AFC 4 5
+42: EQ 3 3 4
+43: ASRT 3
+44: PTR 3 @0
+45: AFC 4 0
+46: EQ 3 3 4
+47: ASRT 3
+48: PTR 3 @0
+49: COPA 3 3
+50: AFC 4 5
+51: ADD 3 3 4
+52: COP @0 3
+53: COP 4 @0
+54: AFC 5 10
+55: EQ 4 4 5
+56: ASRT 4
+57: AFC 4 10
+58: COPB @0 4
+59: .array value 3 10
+60: PTR 3 4
+61: .local 14 c
+62: COP 17 3
+63: AFC 18 1
+64: ADD 17 17 18
+65: COP 14 17
+66: AFC 17 50
+67: COPB 14 17
+68: COP 18 3
+69: AFC 19 2
+70: ADD 18 18 19
+71: AFC 19 51
+72: COPB 18 19
+73: COP 20 3
+74: AFC 21 3
+75: AFC 22 52
+76: ADD 20 20 21
+77: COPB 20 22
+78: COP 21 3
+79: AFC 23 1
+80: ADD 21 21 23
+81: COPA 21 21
+82: AFC 23 50
+83: EQ 21 21 23
+84: ASRT 21
+85: COP 21 3
+86: AFC 23 1
+87: ADD 21 21 23
+88: COPA 21 21
+89: AFC 23 50
+90: EQ 21 21 23
+91: ASRT 21
+92: COP 21 3
+93: AFC 23 2
+94: ADD 21 21 23
+95: COPA 21 21
+96: AFC 23 51
+97: EQ 21 21 23
+98: ASRT 21
+99: COP 21 3
+100: AFC 23 3
+101: ADD 21 21 23
+102: COPA 21 21
+103: AFC 23 52
+104: EQ 21 21 23
+105: ASRT 21
+106: RET
+107: .area bootstrap
+108: AFC @1 7
+109: AFC @2 21
+110: CALL @2
+111: EXIT

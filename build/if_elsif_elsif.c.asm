@@ -1,0 +1,70 @@
+0: .file test/if_elsif_elsif.c
+1: .area start
+2: JMP 67
+3: .function main 0
+4: .local 1 i
+5: AFC 2 0
+6: COP 1 2
+7: .array ok 2 3
+8: PTR 2 3
+9: COP 6 1
+10: AFC 7 3
+11: INF 6 6 7
+12: JMF 6 65
+13: COP 7 1
+14: AFC 8 0
+15: EQ 7 7 8
+16: JMF 7 27
+17: COP 8 1
+18: AFC 9 0
+19: EQ 8 8 9
+20: ASRT 8
+21: COP 8 2
+22: AFC 9 0
+23: AFC 10 1
+24: ADD 8 8 9
+25: COPB 8 10
+26: JMP 40
+27: COP 6 1
+28: AFC 7 1
+29: EQ 6 6 7
+30: JMF 6 41
+31: COP 7 1
+32: AFC 8 1
+33: EQ 7 7 8
+34: ASRT 7
+35: COP 7 2
+36: AFC 8 1
+37: AFC 9 1
+38: ADD 7 7 8
+39: COPB 7 9
+40: JMP 54
+41: COP 6 1
+42: AFC 7 2
+43: EQ 6 6 7
+44: JMF 6 55
+45: COP 7 1
+46: AFC 8 2
+47: EQ 7 7 8
+48: ASRT 7
+49: COP 7 2
+50: AFC 8 2
+51: AFC 9 1
+52: ADD 7 7 8
+53: COPB 7 9
+54: JMP 55
+55: COP 6 2
+56: COP 7 1
+57: ADD 6 6 7
+58: COPA 6 6
+59: ASRT 6
+60: COP 6 1
+61: AFC 7 1
+62: ADD 6 6 7
+63: COP 1 6
+64: JMP 9
+65: RET
+66: .area bootstrap
+67: AFC @0 4
+68: CALL @0
+69: EXIT

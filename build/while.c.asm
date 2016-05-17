@@ -1,0 +1,53 @@
+0: .file test/while.c
+1: .area start
+2: JMP 50
+3: .function main 0
+4: .local 1 a
+5: AFC 2 0
+6: COP 1 2
+7: .local 2 b
+8: AFC 3 0
+9: COP 2 3
+10: COP 3 1
+11: AFC 4 10
+12: INF 3 3 4
+13: JMF 3 40
+14: COP 4 1
+15: PRI 4
+16: AFC 4 0
+17: COP 2 4
+18: COP 5 2
+19: AFC 6 10
+20: INF 5 5 6
+21: JMF 5 35
+22: COP 6 2
+23: AFC 7 5
+24: INF 6 6 7
+25: JMF 6 30
+26: COP 7 1
+27: PRID 7 a
+28: COP 7 2
+29: PRID 7 b
+30: COP 3 2
+31: AFC 4 1
+32: ADD 3 3 4
+33: COP 2 3
+34: JMP 18
+35: COP 3 1
+36: AFC 4 1
+37: ADD 3 3 4
+38: COP 1 3
+39: JMP 10
+40: COP 3 1
+41: AFC 4 10
+42: EQ 3 3 4
+43: ASRT 3
+44: COP 3 2
+45: AFC 4 10
+46: EQ 3 3 4
+47: ASRT 3
+48: RET
+49: .area bootstrap
+50: AFC @0 4
+51: CALL @0
+52: EXIT

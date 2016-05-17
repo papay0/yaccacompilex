@@ -1,0 +1,57 @@
+0: .file test/if_else_2.c
+1: .area start
+2: JMP 54
+3: .function main 0
+4: .local 1 a
+5: AFC 2 0
+6: COP 1 2
+7: .array ok 2 2
+8: PTR 2 3
+9: COP 5 1
+10: AFC 6 2
+11: INF 5 5 6
+12: JMF 5 50
+13: COP 6 1
+14: AFC 7 0
+15: EQ 6 6 7
+16: JMF 6 35
+17: .local 5 b
+18: AFC 8 2
+19: COP 5 8
+20: COP 8 5
+21: AFC 9 3
+22: INF 8 8 9
+23: JMF 8 29
+24: COP 9 5
+25: AFC 10 1
+26: ADD 9 9 10
+27: COP 5 9
+28: JMP 20
+29: COP 6 2
+30: AFC 7 0
+31: AFC 8 1
+32: ADD 6 6 7
+33: COPB 6 8
+34: JMP 40
+35: COP 5 2
+36: AFC 6 1
+37: AFC 7 1
+38: ADD 5 5 6
+39: COPB 5 7
+40: COP 5 2
+41: COP 6 1
+42: ADD 5 5 6
+43: COPA 5 5
+44: ASRT 5
+45: COP 5 1
+46: AFC 6 1
+47: ADD 5 5 6
+48: COP 1 5
+49: JMP 9
+50: AFC 5 1
+51: ASRT 5
+52: RET
+53: .area bootstrap
+54: AFC @0 4
+55: CALL @0
+56: EXIT
